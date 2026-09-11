@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Action Almala3b</title>
+<link rel="icon" type="image/jpeg" href="images/Gemini_Generated_Image_yj3nmeyj3nmeyj3n.jpg">
+<link rel="apple-touch-icon" href="images/Gemini_Generated_Image_yj3nmeyj3nmeyj3n.jpg">
+<meta name="description" content="Action Almala3b — build your dream football lineup and battle friends online in this fast, card-based multiplayer game. أكشن الملعب — كوّن تشكيلتك المفضلة وتحدى أصحابك أونلاين في لعبة كوتشينة كرة قدم سريعة وممتعة.">
+<meta property="og:title" content="Action Almala3b">
+<meta property="og:description" content="Build your dream football lineup and battle friends online in this fast, card-based multiplayer game.">
+<meta property="og:image" content="images/Gemini_Generated_Image_yj3nmeyj3nmeyj3n.jpg">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@500;700;800&family=Orbitron:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
@@ -414,11 +420,13 @@ function renderRules(lang){
     sec.items.forEach(it=>{
       const row = document.createElement('div');
       row.className = 'rule-item';
-      const gullitTag = it.isGullit ? `<span class="gullit-tag"><img src="images/gullit.png" alt="Gullit"><span>Gullit</span></span>` : '';
+      const badgeContent = it.isGullit
+        ? `<img src="images/gullit.png" alt="Gullit" style="width:100%;height:100%;object-fit:cover;object-position:center 15%;border-radius:8px;">`
+        : it.icon;
       row.innerHTML = `
-        <div class="rule-badge ${it.badge}">${it.icon}</div>
+        <div class="rule-badge ${it.badge}">${badgeContent}</div>
         <div class="rule-text">
-          <div class="rule-text-title">${it.title}${gullitTag}</div>
+          <div class="rule-text-title">${it.title}</div>
           <div class="rule-text-desc">${it.desc}</div>
         </div>`;
       secEl.appendChild(row);
