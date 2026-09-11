@@ -57,7 +57,9 @@
     font-size:clamp(38px, 11vw, 78px);
     letter-spacing:2px;
     display:flex;
-    gap:0.28em;
+    flex-direction:column;
+    align-items:center;
+    gap:0.08em;
   }
   .word-action{
     color:var(--cyan);
@@ -249,6 +251,20 @@
   .badge-gold{background:rgba(255,215,0,0.12);}
   .badge-red{background:rgba(255,59,59,0.12);}
 
+.gullit-tag{
+    display:inline-flex;align-items:center;gap:5px;
+    background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);
+    border-radius:20px;padding:2px 9px 2px 2px;margin-inline-start:6px;
+    vertical-align:middle;
+  }
+  .gullit-tag img{
+    width:20px;height:20px;border-radius:50%;object-fit:cover;object-position:center 15%;
+    display:block;
+  }
+  .gullit-tag span{
+    font-size:11px;font-weight:700;color:#ffd700;font-family:'Orbitron',sans-serif;
+  }
+
   [dir="rtl"] .rule-item{direction:rtl;}
   [dir="rtl"] .modal-body{text-align:right;}
 </style>
@@ -341,7 +357,7 @@ const content = {
           { icon:'⏳', badge:'badge-cyan', title:'Loan', desc:'Borrows an opponent\'s player for 2 turns, then returns them automatically.' },
           { icon:'🛡️', badge:'badge-cyan', title:'Cancel Order', desc:'Cancels a special card played against you — use it within the reaction window.' },
           { icon:'🗑️', badge:'badge-red', title:'Trash Player', desc:'Removes one of your own field players — used to fix a bad placement.' },
-          { icon:'👑', badge:'badge-gold', title:'Gullit', desc:'A wildcard player that can slot into any zone and fill in for a missing number in a consecutive sequence.' }
+          { icon:'👑', badge:'badge-gold', title:'Gullit', desc:'A wildcard player that can slot into any zone and fill in for a missing number in a consecutive sequence.', isGullit:true }
         ]
       }
     ]
@@ -376,7 +392,7 @@ const content = {
           { icon:'⏳', badge:'badge-cyan', title:'الإعارة', desc:'تستعير لاعباً من الخصم لمدة دورين، ثم يعود إليه تلقائياً.' },
           { icon:'🛡️', badge:'badge-cyan', title:'إلغاء الأمر', desc:'تُلغي بطاقة خاصة استُخدمت ضدك، ويجب استخدامها خلال فترة الرد المحددة.' },
           { icon:'🗑️', badge:'badge-red', title:'استبعاد لاعب', desc:'تُزيل أحد لاعبيك من ملعبك، وتُستخدم لتصحيح خطأ في الوضع.' },
-          { icon:'👑', badge:'badge-gold', title:'خوليت', desc:'لاعب مشترك يمكنه شغل أي مركز، ويكمّل الرقم الناقص في تسلسل الأرقام المتتالية.' }
+          { icon:'👑', badge:'badge-gold', title:'خوليت', desc:'لاعب مشترك يمكنه شغل أي مركز، ويكمّل الرقم الناقص في تسلسل الأرقام المتتالية.', isGullit:true }
         ]
       }
     ]
@@ -398,10 +414,11 @@ function renderRules(lang){
     sec.items.forEach(it=>{
       const row = document.createElement('div');
       row.className = 'rule-item';
+      const gullitTag = it.isGullit ? `<span class="gullit-tag"><img src="images/gullit.png" alt="Gullit"><span>Gullit</span></span>` : '';
       row.innerHTML = `
         <div class="rule-badge ${it.badge}">${it.icon}</div>
         <div class="rule-text">
-          <div class="rule-text-title">${it.title}</div>
+          <div class="rule-text-title">${it.title}${gullitTag}</div>
           <div class="rule-text-desc">${it.desc}</div>
         </div>`;
       secEl.appendChild(row);
