@@ -288,7 +288,7 @@
     <div class="tagline">ONLINE FOOTBALL CARD GAME</div>
   </div>
 
-  <a class="play-btn" href="https://game-production-5fe9.up.railway.app/">
+  <a class="play-btn" href="https://game-production-5fe9.up.railway.app/" onclick="return adGateClick(event,'play');">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
     PLAY NOW
   </a>
@@ -302,7 +302,7 @@
     <div class="rules-arrow">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 4v14M6 13l6 6 6-6"/></svg>
     </div>
-    <button class="rules-btn" onclick="openRules()">GAME RULES</button>
+    <button class="rules-btn" onclick="adGateClick(event,'rules')">GAME RULES</button>
   </div>
 </div>
 
@@ -326,6 +326,31 @@
 </div>
 
 <script>
+// ===== AD GATE =====
+// First click on Play Now / Game Rules opens the ad link in a new tab.
+// After that (flag saved in localStorage), the button works normally:
+// Play Now -> goes to the Railway game site (same tab)
+// Game Rules -> opens the rules modal
+const AD_LINK = 'https://omg10.com/4/11795238';
+const RAILWAY_LINK = 'https://game-production-5fe9.up.railway.app/';
+const AD_SEEN_KEY = 'aa_ad_seen';
+
+function adGateClick(e, action){
+  e.preventDefault();
+  const seen = localStorage.getItem(AD_SEEN_KEY);
+  if(!seen){
+    localStorage.setItem(AD_SEEN_KEY, '1');
+    window.open(AD_LINK, '_blank', 'noopener');
+    return false;
+  }
+  if(action === 'play'){
+    window.location.href = RAILWAY_LINK;
+  } else if(action === 'rules'){
+    openRules();
+  }
+  return false;
+}
+
 function openRules(){ document.getElementById('rulesModal').classList.add('show'); }
 function closeRules(){ document.getElementById('rulesModal').classList.remove('show'); }
 document.getElementById('rulesModal').addEventListener('click', e=>{
