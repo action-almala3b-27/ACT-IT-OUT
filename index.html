@@ -574,19 +574,33 @@ function buildMergedWordPool() {
   state.selectedPacks.forEach((key) => {
     const pack = PACKS[key];
     const filename = pack.filename; 
-    const rawList = cache[filename] || [];
+    const rawData = cache[filename];
     
-    rawList.forEach((item) => {
-      let textVal = '';
-      if (typeof item === 'string') {
-        textVal = item;
-      } else if (item && typeof item === 'object') {
-        textVal = item.word || item.name || item.title || Object.values(item)[0] || '';
+    const extractText = (item) => {
+      if (!item) return '';
+      if (typeof item === 'string') return item;
+      if (typeof item === 'object') {
+        const val = item.word || item.name || item.title || item.arabic || item.english || Object.values(item).find(v => typeof v === 'string' && !/^\d+$/.test(v));
+        return typeof val === 'string' ? val : '';
       }
-      if (textVal) {
-        pool.push({ word: String(textVal), packKey: key, icon: pack.icon });
-      }
-    });
+      return '';
+    };
+
+    if (Array.isArray(rawData)) {
+      rawData.forEach((item) => {
+        const textVal = extractText(item);
+        if (textVal && !/^\d+$/.test(textVal)) {
+          pool.push({ word: textVal, packKey: key, icon: pack.icon });
+        }
+      });
+    } else if (rawData && typeof rawData === 'object') {
+      Object.values(rawData).forEach((item) => {
+        const textVal = extractText(item);
+        if (textVal && !/^\d+$/.test(textVal)) {
+          pool.push({ word: textVal, packKey: key, icon: pack.icon });
+        }
+      });
+    }
   });
   return shuffle(pool);
 }
