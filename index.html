@@ -122,15 +122,6 @@
   }
   @keyframes popin { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-  .shake { animation: shake .4s ease; }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-  }
-
   #teamStrip::-webkit-scrollbar { display: none; }
   #teamStrip { scrollbar-width: none; }
   #categoryGrid::-webkit-scrollbar { display: none; }
@@ -159,13 +150,9 @@
     <button data-lang="ar" class="lang-btn btn-hero w-full rounded-xl py-4 text-lg font-black arabic">العربية</button>
     <button data-lang="en" class="lang-btn btn-join w-full rounded-xl py-4 text-lg font-black tracking-wide">English</button>
   </div>
-
-  <p class="text-zinc-600 text-[11px] mt-6 text-center max-w-xs leading-relaxed">
-    مرر الموبايل بين الفرق • Pass the phone between teams
-  </p>
 </div>
 
-<!-- ============ SCREEN 2: SETUP (category / timer / teams) ============ -->
+<!-- ============ SCREEN 2: SETUP ============ -->
 <div id="screen-setup" class="screen hidden home-bg flex-col overflow-hidden">
   <div class="flex items-center justify-between px-4 py-3 shrink-0">
     <button id="backToLang" class="btn-ghost rounded-full w-9 h-9 flex items-center justify-center text-lg">←</button>
@@ -213,7 +200,7 @@
   </div>
 
   <div class="shrink-0 px-4 pb-4 pt-1">
-    <button id="startGameBtn" class="btn-hero w-full rounded-xl py-3.5 text-lg font-black arabic">ابدأ اللعب 🎬</button>
+    <button id="startGameBtn" class="btn-hero w-full rounded-xl py-3.5 text-lg font-black arabic" disabled>جاري تحميل البيانات... ⏳</button>
   </div>
 </div>
 
@@ -229,7 +216,6 @@
 
 <!-- ============ SCREEN 3: GAME ============ -->
 <div id="screen-game" class="screen hidden flex-col home-bg">
-  <!-- Top bar -->
   <div class="flex items-center justify-between px-4 py-2 shrink-0">
     <button id="endGameBtn" class="btn-ghost rounded-full px-3 py-1.5 text-[11px] font-bold">🏁 <span class="endTxt">إنهاء</span></button>
     <div class="text-sm font-black glow-text tracking-widest">🎭 <span class="arabic">التمثيل</span></div>
@@ -239,20 +225,15 @@
     </div>
   </div>
 
-  <!-- Team scores strip -->
   <div id="teamStrip" class="flex gap-1.5 overflow-x-auto px-3 pb-2 shrink-0"></div>
 
-  <!-- Center game field -->
   <div class="flex-1 flex flex-col items-center justify-center px-6 min-h-0 relative">
-
-    <!-- Pre-round: whose turn -->
     <div id="turnIntro" class="text-center">
       <div class="text-zinc-400 text-sm mb-1 arabic">دور فريق</div>
       <div id="currentTeamName" class="text-3xl font-black title-gradient mb-6"></div>
       <button id="revealBtn" class="btn-hero rounded-2xl px-8 py-5 text-lg font-black arabic">👆 اضغط لإظهار الكلمة</button>
     </div>
 
-    <!-- Active round: timer + word + single correct button -->
     <div id="roundActive" class="hidden flex-col items-center w-full">
       <div class="flex items-center justify-center gap-5 w-full max-w-xs mb-6">
         <div class="relative w-24 h-24 shrink-0">
@@ -272,7 +253,6 @@
       </div>
     </div>
 
-    <!-- Round end summary -->
     <div id="roundEnd" class="hidden flex-col items-center text-center">
       <div id="endIcon" class="text-5xl mb-3">⏰</div>
       <div id="endHeadline" class="text-xl font-black mb-1 arabic">خلص الوقت!</div>
@@ -295,60 +275,84 @@
 
 <script>
 /* =========================================================
-   DATA — word banks (500+ items per pack, per language)
-   ========================================================= */
-const FOOTBALL_WORDS = ["Mohamed Salah", "Mohamed Aboutrika", "Ahmed Hossam Mido", "Amr Warda", "Mahmoud El Khatib", "Hazem Emam", "Mohamed El Shenawy", "Ramadan Sobhy", "Trezeguet", "Abdallah El Said", "Hossam Hassan", "Ibrahim Hassan", "Ahmed Fathy", "Mohamed Elneny", "Omar Marmoush", "Zizo", "Walid Soliman", "Ahmed Refaat", "Mohamed Sherif", "Tarek Hamed", "Osama Nabih", "Shikabala", "Ahmed Sami", "Yasser Ibrahim", "Akram Tawfik", "Mahmoud Metwalli", "Taha Yassine Khenissi", "Ali Maaloul", "Hamdi Elhouni", "Emad Meteb", "Shady Mohamed", "Mohamed Ibrahim", "Karrar", "Ahmed Atef Kotta", "Mostafa Mohamed", "Marwan Attia", "Ahmed Deweidar", "Ahmed El Sheikh", "Karim Hafez", "Mahmoud Kahraba", "Ahmed Ayman Mansour", "Rabie Ataya", "Amr El Sulya", "Mohamed Magdy Afsha", "Ahmed Yasser Rayan", "Marwan Hamdy", "Mohamed Hany", "Islam Issa", "Hussein El Shahat", "Mohamed Abdel Shafy", "Ahmed Sayed Zizo", "Ayman Ashraf", "Riyad Mahrez", "Youssef Msakni", "Wahbi Khazri", "Hakim Ziyech", "Achraf Hakimi", "Youssef En-Nesyri", "Sofiane Boufal", "Youssef El Arabi", "Baghdad Bounedjah", "Islam Slimani", "Riad Bensayah", "Marwan Mohsen", "Karim Benzema", "Nabil Fekir", "Sofyan Amrabat", "Noussair Mazraoui", "Romain Saiss", "Ayoub El Kaabi", "Amine Harit", "Yassine Bounou", "Munas Dabbur", "Ali Mabkhout", "Omar Abdulrahman", "Yasser Al-Qahtani", "Sami Al-Jaber", "Majed Abdullah", "Salman Al-Faraj", "Salem Al-Dawsari", "Fahad Al-Muwallad", "Firas Al-Buraikan", "Yahya Al-Shehri", "Abderrazak Hamdallah", "Karim Ansarifard", "Sardar Azmoun", "Mehdi Taremi", "Ali Karimi", "Younis Mahmoud", "Bashar Resan", "Alaa Abbas", "Ahmad Ibrahim Al Hammadi", "Ismail Matar", "Ahmed Khalil", "Omar Al Somah", "Firas Al Khatib", "Mahmoud Al Mawas", "Mohamad Marmoush", "Lionel Messi", "Cristiano Ronaldo", "Neymar", "Kylian Mbappe", "Erling Haaland", "Kevin De Bruyne", "Robert Lewandowski", "Luka Modric", "Sergio Ramos", "Virgil van Dijk", "Toni Kroos", "Andres Iniesta", "Xavi Hernandez", "Zinedine Zidane", "Ronaldinho", "Ronaldo Nazario", "David Beckham", "Wayne Rooney", "Thierry Henry", "Didier Drogba", "Zlatan Ibrahimovic", "Gareth Bale", "Eden Hazard", "Paul Pogba", "Antoine Griezmann", "Harry Kane", "Luis Suarez", "Sergio Aguero", "Diego Maradona", "Pele", "Johan Cruyff", "Franz Beckenbauer", "George Best", "Andrea Pirlo", "Francesco Totti", "Paolo Maldini", "Xabi Alonso", "Iker Casillas", "Gianluigi Buffon", "Manuel Neuer", "Thomas Muller", "Philipp Lahm", "Bastian Schweinsteiger", "Miroslav Klose", "Samuel Eto'o", "Michael Owen", "Steven Gerrard", "Frank Lampard", "John Terry", "Rio Ferdinand", "Ashley Cole", "Sol Campbell", "David Silva", "Andres Guardado", "Javier Hernandez", "Rafael Marquez", "Hugo Sanchez", "Claudio Suarez", "Carlos Vela", "Raul Jimenez", "Hirving Lozano", "Kaka", "Romario", "Rivaldo", "Cafu", "Roberto Carlos", "Dani Alves", "Marcelo", "Casemiro", "Fabinho", "Philippe Coutinho", "Vinicius Junior", "Rodrygo", "Gabriel Jesus", "Richarlison", "Sergio Busquets", "Gerard Pique", "Carles Puyol", "David Villa", "Fernando Torres", "Cesc Fabregas", "Isco", "Marco Asensio", "Dani Carvajal", "Jordi Alba", "Pedri", "Gavi", "Ansu Fati", "Ferran Torres", "Alvaro Morata", "Diego Costa", "Cesar Azpilicueta", "Jordi Amat", "Thiago Alcantara", "Koke", "Diego Simeone", "Radamel Falcao", "James Rodriguez", "Juan Cuadrado", "David Ospina", "Carlos Bacca", "Teofilo Cubillas", "Roberto Baggio", "Alessandro Del Piero", "Gianfranco Zola", "Fabio Cannavaro", "Alessandro Nesta", "Christian Vieri", "Filippo Inzaghi", "Marco Van Basten", "Ruud Gullit", "Frank Rijkaard", "Dennis Bergkamp", "Clarence Seedorf", "Edgar Davids", "Robin van Persie", "Arjen Robben", "Wesley Sneijder", "Memphis Depay", "Frenkie de Jong", "Matthijs de Ligt", "Georginio Wijnaldum", "Eric Cantona", "Michel Platini", "Just Fontaine", "Raymond Kopa", "Jean-Pierre Papin", "Marcel Desailly", "Lilian Thuram", "Patrick Vieira", "Claude Makelele", "Robert Pires", "David Trezeguet", "Franck Ribery", "N'Golo Kante", "Blaise Matuidi", "Olivier Giroud", "Hugo Lloris", "Raphael Varane", "Ousmane Dembele", "Karim Adeyemi", "Jamal Musiala", "Ilkay Gundogan", "Mesut Ozil", "Mario Gotze", "Andre Schurrle", "Jerome Boateng", "Mats Hummels", "Marco Reus", "Julian Draxler", "Leroy Sane", "Timo Werner", "Kai Havertz", "Joshua Kimmich", "Sergej Milinkovic-Savic", "Luka Jovic", "Dusan Tadic", "Dusan Vlahovic", "Aleksandar Mitrovic", "Nemanja Vidic", "Nemanja Matic", "Branislav Ivanovic", "Zlatko Zahovic", "Ivan Rakitic", "Mario Mandzukic", "Ivan Perisic", "Marcelo Brozovic", "Dejan Lovren", "Domagoj Vida", "Josip Simunic", "Davor Suker", "Robert Prosinecki", "Zvonimir Boban", "Ivica Osim", "Robert Jarni", "Emil Forsberg", "Henrik Larsson", "Freddie Ljungberg", "Kim Kallstrom", "Ole Gunnar Solskjaer", "John Arne Riise", "Martin Odegaard", "Alexander Isak", "Christian Eriksen", "Kasper Schmeichel", "Peter Schmeichel", "Simon Kjaer", "Pierre-Emile Hojbjerg", "Yussuf Poulsen", "Robin Olsen", "Sebastian Larsson", "Andreas Granqvist", "Jon Dahl Tomasson", "Michael Laudrup", "Brian Laudrup", "Preben Elkjaer", "Allan Simonsen", "Aaron Ramsey", "Joe Allen", "Ashley Williams", "Wayne Hennessey", "Daniel James", "Kieffer Moore", "Robert Page", "James Milner", "Jack Grealish", "Phil Foden", "Bukayo Saka", "Jude Bellingham", "Declan Rice", "Mason Mount", "Raheem Sterling", "Marcus Rashford", "Jadon Sancho", "Trent Alexander-Arnold", "Kyle Walker", "John Stones", "Harry Maguire", "Jordan Henderson", "Dele Alli", "Kalvin Phillips", "Conor Coady", "Nick Pope", "Jordan Pickford", "Ben Chilwell", "Luke Shaw", "Kieran Trippier", "Alisson Becker", "Ederson", "Rodri", "Bernardo Silva", "Ruben Dias", "Diogo Jota", "Bruno Fernandes", "Joao Felix", "Joao Cancelo", "Danilo Pereira", "Pepe", "Nani", "Luis Figo", "Deco", "Eusebio", "Fernando Santos", "Rui Costa", "Fernando Couto", "Vitor Baia", "Simao Sabrosa", "Ricardo Quaresma", "Andre Silva", "Goncalo Guedes", "William Carvalho", "Renato Sanches", "Ivan Toney", "Ollie Watkins", "James Maddison", "Cole Palmer", "Rico Lewis", "Julian Alvarez", "Enzo Fernandez", "Lionel Scaloni", "Angel Di Maria", "Gonzalo Higuain", "Javier Zanetti", "Gabriel Batistuta", "Hernan Crespo", "Juan Roman Riquelme", "Pablo Aimar", "Carlos Tevez", "Lautaro Martinez", "Rodrigo De Paul", "Nicolas Otamendi", "Emiliano Martinez", "Alexis Mac Allister", "Nahuel Molina", "Cristian Romero", "Marcelo Gallardo", "Diego Forlan", "Edinson Cavani", "Fernando Muslera", "Diego Godin", "Jose Gimenez", "Federico Valverde", "Ronald Araujo", "Darwin Nunez", "Enzo Francescoli", "Son Heung-min", "Kim Min-jae", "Takefusa Kubo", "Kaoru Mitoma", "Wataru Endo", "Daichi Kamada", "Tim Cahill", "Harry Kewell", "Mile Jedinak", "Aaron Mooy", "Mathew Ryan", "Ange Postecoglou", "Keisuke Honda", "Shinji Kagawa", "Shunsuke Nakamura", "Hidetoshi Nakata", "Yuto Nagatomo", "Ki Sung-yueng", "Park Ji-sung", "Cha Bum-kun", "Ahn Jung-hwan", "Hong Myung-bo", "Landon Donovan", "Clint Dempsey", "Tim Howard", "Christian Pulisic", "Weston McKennie", "Gio Reyna", "Tyler Adams", "Sergino Dest", "Brenden Aaronson", "Alphonso Davies", "Jonathan David", "Thorgan Hazard", "Yannick Carrasco", "Kevin Mirallas", "Toby Alderweireld", "Jan Vertonghen", "Vincent Kompany", "Axel Witsel", "Dries Mertens", "Moussa Dembele", "Radja Nainggolan", "Marouane Fellaini", "Christian Benteke", "Michy Batshuayi", "Romelu Lukaku", "Divock Origi", "Leandro Trossard", "Charles De Ketelaere", "Amadou Onana", "Youri Tielemans", "Timothy Castagne", "Thomas Meunier", "Nacer Chadli", "Steven Defour", "Jason Denayer", "Simon Mignolet", "Thibaut Courtois", "Papiss Cisse", "Sadio Mane", "Idrissa Gueye", "Kalidou Koulibaly", "Ismaila Sarr", "Cheikhou Kouyate", "Boulaye Dia", "Nicolas Jackson", "Pathe Ciss", "Krepin Diatta", "Andre Onana", "Vincent Aboubakar", "Christian Bassogog", "Karl Toko Ekambi", "Rigobert Song", "Roger Milla", "Joseph-Antoine Bell", "Patrick Mboma", "Geremi", "Emmanuel Adebayor", "Yaya Toure", "Kolo Toure", "Didier Zokora", "Salomon Kalou", "Wilfried Bony", "Gervinho", "Serge Aurier", "Franck Kessie", "Nicolas Pepe", "Sebastien Haller", "Max Gradel", "Jean-Michael Seri", "Wilfried Zaha", "Victor Osimhen", "John Obi Mikel", "Jay-Jay Okocha", "Nwankwo Kanu", "Sunday Oliseh", "Rashidi Yekini", "Ahmed Musa", "Alex Iwobi", "Wilfred Ndidi", "William Troost-Ekong", "Kelechi Iheanacho", "Victor Moses", "Odion Ighalo", "Samuel Chukwueze", "Asisat Oshoala", "Michael Essien", "Asamoah Gyan", "Andre Ayew", "Jordan Ayew", "Abedi Pele", "Sulley Muntari", "Kwame Ayew", "Thomas Partey", "Mohammed Kudus", "Christian Atsu", "Stephen Appiah", "Anthony Annan", "Bafetimbi Gomis", "Mamadou Sakho", "Bacary Sagna", "Patrice Evra", "William Gallas", "Louis Saha", "Djibril Cisse", "Sidney Govou", "Florent Malouda", "Steed Malbranque", "Youri Djorkaeff", "Bixente Lizarazu", "Emmanuel Petit", "Christophe Dugarry", "Fabien Barthez", "Laurent Blanc", "Bernard Lama", "Sammy Kuffour", "Anthony Baffoe", "Charles Akonnor", "John Paintsil", "Richard Kingson", "Junior Agogo", "Matthew Amoah", "Laryea Kingston", "Derek Boateng", "Michael Owusu", "Vincent Enyeama", "Peter Rufai", "Taribo West", "Celestine Babayaro", "Finidi George", "Daniel Amokachi", "Emmanuel Amuneke", "Mutiu Adepoju", "Garba Lawal", "Julius Aghahowa"];
-
-const MOVIES_AR = ["الفيل الأزرق", "عسل أسود", "الرهينة", "تيتو", "عمارة يعقوبيان", "حسن ومرقص", "الجزيرة", "كباريه", "سمير أبو النيل", "فبراير الأسود", "واحد صفر", "إبراهيم الأبيض", "المصلحة", "أصحاب ولا أعز", "لص بغداد", "اللمبي", "صعيدي في الجامعة الأمريكية", "عبود على الحدود", "مرجان أحمد مرجان", "حرامية في كي جي تو", "الناظر", "زهايمر", "بلبل حيران", "كده رضا", "تراب الماس", "هي فوضى", "البريء", "المشبوه", "العار", "الكيت كات", "سواق الأتوبيس", "الإرهاب والكباب", "اللعب مع الكبار", "سهر الليالي", "الباشا تلميذ", "فتح عينيك", "اسكندرية ليه", "الرغبة", "حين ميسرة", "ولاد العم", "ديل السمكة", "الفرح", "خلي بالك من زوزو", "شفيقة ومتولي", "البيه البواب", "المنسي", "طيور الظلام", "طباخ الريس", "قصة الحي الغربي", "مافيا", "الديزل", "ولاد رزق", "كازابلانكا", "مطاردة نص الليل", "هليوبوليس", "ميكروفون", "فاصل ونعود", "السلم والثعبان", "ديكور", "فتاة المصنع", "آسف على الإزعاج", "هرج ومرج", "عيار ناري", "قط وفار", "رأفت الهجان", "لن أعيش في جلباب أبي", "الأسطورة", "الاختيار", "جراند أوتيل", "هوجان", "الكبير أوي", "أبواب الغيم", "ونيس", "الزيبق", "أرابيسك", "عمر", "باب الحارة", "عاصي", "غداً نلتقي", "زي الشمس", "الطاووس", "سجن النسا", "لعبة النسيان", "نسر الصعيد", "موجة حارة", "جعفر العمدة", "الآنسة فرح", "أفراح القبة", "تحت السيطرة", "القاهرة كابول", "فالنتينو", "طايع", "صاحب السعادة", "البرنس", "نسل الأغراب", "ألف ليلة وليلة", "كلبش", "لعبة الموت", "رحيم", "بدون سابق إنذار", "الرحايا", "الحساب يجمع", "حق عرب", "زلزال", "القيصر", "سره الباتع", "تاج", "نيران صديقة", "الوصية", "لعبة الحظ", "ابو جبل", "ابو العروسة", "الحرب العالمية الثالثة", "دلع بنات", "لؤلؤة", "دعاء الكروان", "شيء من الخوف", "الأرض", "بداية ونهاية", "خلي بالك من عقلك", "السكرية", "بين القصرين", "قصر الشوق", "الحرافيش", "ريا وسكينة", "امبراطورية ميم", "أميرة حبي أنا", "غزل البنات", "لاشين", "العزيمة", "سلامة في خير", "شارع الحب", "لصوص لكن ظرفاء", "السفيرة عزيزة", "امرأة من زجاج", "موعد على العشاء", "أهل القمة", "التخشيبة", "ناجي العلي", "ناصر 56", "المهاجر", "المصير", "الآخر", "إسكندرية كمان وكمان", "أيوب", "دنيا", "عيون لا تنام", "الرصاصة لا تزال في جيبي", "أبناء الصمت", "قاهر الظلام", "بحب السيما", "ليلة سقوط بغداد", "ملاكي إسكندرية", "دم الغزال", "فيلم ثقافي", "بنات وسط البلد", "واحد من الناس", "كيرة والجن", "الممر", "الفلوس", "122", "هروب اضطراري", "الكنز", "بابا امين", "خالتي فرنسا", "بتوقيت القاهرة", "قصة حب", "اشتباك", "يوم الدين", "فوتوكوبي", "ليلة البيبي دول", "عايزة اتجوز", "كف القمر", "واحد تاني", "ابن القنصل", "السفارة في العمارة", "تيمور وشفيقة", "خيال مآتة", "ريستارت", "الانس والجن", "الحفلة", "في عز الضهر", "مش أنا", "الداعية", "خلف الشمس", "لعبة نيوتن", "النهاية", "رشيد", "الشاهد", "قابيل", "أهو ده اللي صار", "فرصة تانية", "بيت الروبي", "ما وراء الطبيعة", "بالحجم العائلي", "كامل العدد", "السيرة الهلالية", "مأمون وشركاه", "واحة الغروب", "حرب كرموز", "دهشة", "في بيتنا روبوت", "العائدون", "فرقة ناجي عطا الله", "نصيبي وقسمتك", "هيبتا", "مطب صناعي", "الكابوس", "كسر عضم", "قواعد الطلاق الأربعين", "ليه لأ", "السيدة الأولى", "ليلة القبض على فاطمة", "حق ميت", "ولي العهد", "حدوتة مصرية", "رمضان كريم", "جميلة", "دايمًا عامر", "بدل فاقد", "السلطان عبدالحميد", "ممالك النار", "العهد", "حريم السلطان", "وادي الذئاب", "عروس بيروت", "اللي بالي بالك", "هي وهو", "حبيبي دائما", "الرجل الأبيض المتوسط", "كتكوت", "لا مؤاخذة", "سمير وشهير وبهير", "عيال حبيبة", "بوبوس", "عبده موتة", "النبطشي", "كابتن مصر", "قدرات غير عادية", "التجربة الدنماركية", "هارلي", "عندليب الدقي", "كوكو شانيل", "مين قال", "عاوز حقي", "السرب", "ورقة شفرة", "سيلفي", "آدم", "ولاد البلد", "باب الوداع", "إشاعة حب", "قصر النيل", "حرب إيطاليا", "بحبك انا كمان", "هنا القاهرة", "خمسة باب", "لولو", "فرح ليلى", "ريجاتا", "سالم أبوأخته", "مهمة في تل أبيب", "الجريمة", "ورد مسموم", "كامل الأوصاف", "ليلة عيد", "خالتي صفية والدير", "الأصدقاء", "بين السرايات", "المومياء", "عودة مواطن", "الأصلين", "عصابة حمادة وتوتو", "الحفيد", "أرض الأحلام", "بنت اسمها ذات", "أبو علي", "ليه خلتني أحبك", "ذهاب وعودة", "في محطة مصر", "بدون ذكر أسماء", "السبع وصايا", "يوميات ونيس", "صاحبة السعادة", "حكايتي", "لا تطفئ الشمس", "اسمهان", "ليالي الحلمية", "دموع في عيون وقحة", "الوعد الحق", "ذئاب الجبل", "هجمة مرتدة", "أهل كايرو", "سوق العصر", "الف مبروك", "تحت الوصاية", "العربجي", "فرقة الموت", "التغريبة الفلسطينية", "عمر المختار", "النمر الأسود", "الجماعة", "عائلة الحاج متولي", "أرض النفاق", "ليالي أوجيني", "حرب أهلية", "أم كلثوم", "ابن حلال", "أنف وثلاث عيون", "حظ سعيد", "خرج ولم يعد", "الطريق إلى إيلات", "عصر القوة", "أحلام عادية", "قلب الأسد"];
-const MOVIES_EN = ["Titanic", "The Godfather", "Forrest Gump", "Inception", "The Dark Knight", "Jurassic Park", "Star Wars", "Pulp Fiction", "The Matrix", "Fight Club", "Gladiator", "Avatar", "The Avengers", "Iron Man", "Spider-Man", "Jaws", "E.T.", "Rocky", "Braveheart", "The Lion King", "Frozen", "Toy Story", "Finding Nemo", "Shrek", "The Lord of the Rings", "Harry Potter", "Home Alone", "Die Hard", "Terminator 2", "Back to the Future", "Casablanca", "Psycho", "The Shining", "Jurassic World", "Interstellar", "The Departed", "Goodfellas", "Schindler's List", "Saving Private Ryan", "The Silence of the Lambs", "American Beauty", "La La Land", "The Social Network", "Whiplash", "Parasite", "Joker", "The Wolf of Wall Street", "Gravity", "Mad Max: Fury Road", "Black Panther", "Kill Bill", "The Prestige", "Inglourious Basterds", "Up", "WALL-E", "Coco", "The Incredibles", "Deadpool", "Guardians of the Galaxy", "Friends", "Breaking Bad", "Game of Thrones", "The Office", "Stranger Things", "The Crown", "Sherlock", "The Simpsons", "House of Cards", "Prison Break", "The Walking Dead", "Peaky Blinders", "Money Heist", "Dark", "Narcos", "The Big Bang Theory", "How I Met Your Mother", "Grey's Anatomy", "Suits", "Lost", "Dexter", "The Wire", "Better Call Saul", "Westworld", "Black Mirror", "The Mandalorian", "Vikings", "The Boys", "Chernobyl", "Ozark", "Fargo", "True Detective", "American Horror Story", "Modern Family", "Brooklyn Nine-Nine", "Rick and Morty", "South Park", "Family Guy", "Downton Abbey", "The Handmaid's Tale", "Squid Game", "Wednesday", "Euphoria", "Succession", "Ted Lasso", "The Witcher", "Outlander", "This Is Us", "Bridgerton", "Emily in Paris", "Only Murders in the Building", "Gone with the Wind", "Citizen Kane", "Vertigo", "Rear Window", "North by Northwest", "Some Like It Hot", "Singin' in the Rain", "12 Angry Men", "Lawrence of Arabia", "The Sound of Music", "West Side Story", "The Graduate", "Bonnie and Clyde", "Easy Rider", "Chinatown", "Taxi Driver", "Apocalypse Now", "The Deer Hunter", "Annie Hall", "Raging Bull", "Amadeus", "Platoon", "Rain Man", "Dances with Wolves", "Unforgiven", "A Beautiful Mind", "Chicago", "Million Dollar Baby", "Crash", "No Country for Old Men", "Slumdog Millionaire", "The Hurt Locker", "The King's Speech", "The Artist", "Argo", "12 Years a Slave", "Birdman", "Spotlight", "Moonlight", "The Shape of Water", "Green Book", "CODA", "Everything Everywhere All at Once", "Oppenheimer", "Barbie", "Dune", "Top Gun: Maverick", "Man of Steel", "Batman Begins", "Wonder Woman", "Aquaman", "Justice League", "Doctor Strange", "Black Widow", "Ant-Man", "Logan", "X-Men", "The Wolverine", "Fantastic Four", "Venom", "John Wick", "Mission: Impossible", "The Bourne Identity", "Casino Royale", "Skyfall", "No Time to Die", "GoldenEye", "Mad Max", "The Fast and the Furious", "Transformers", "Independence Day", "Armageddon", "Deep Impact", "2012", "San Andreas", "World War Z", "I Am Legend", "War of the Worlds", "Signs", "The Sixth Sense", "Split", "Get Out", "Us", "A Quiet Place", "Hereditary", "Midsommar", "The Conjuring", "Insidious", "It", "The Exorcist", "Halloween", "A Nightmare on Elm Street", "Scream", "Saw", "Paranormal Activity", "The Ring", "The Grudge", "28 Days Later", "Zombieland", "Shaun of the Dead", "Warm Bodies", "Train to Busan", "I, Robot", "Ex Machina", "Blade Runner", "Blade Runner 2049", "Arrival", "The Martian", "Contact", "Minority Report", "Total Recall", "Edge of Tomorrow", "Looper", "Source Code", "Tenet", "Memento", "Dunkirk", "1917", "Hacksaw Ridge", "Fury", "American Sniper", "Black Hawk Down", "Pearl Harbor", "Letters from Iwo Jima", "Full Metal Jacket", "The Hunger Games", "Divergent", "Maze Runner", "Twilight", "Fifty Shades of Grey", "The Notebook", "A Star Is Born", "Bohemian Rhapsody", "Rocketman", "Walk the Line", "Ray", "Straight Outta Compton", "8 Mile", "Once Upon a Time in Hollywood", "Reservoir Dogs", "Django Unchained", "Jackie Brown", "The Hateful Eight", "Sicario", "Prisoners", "Enemy", "Nightcrawler", "Gone Girl", "Zodiac", "Se7en", "The Girl with the Dragon Tattoo", "Shutter Island", "Black Swan", "Requiem for a Dream", "The Truman Show", "Eternal Sunshine of the Spotless Mind", "Being John Malkovich", "Adaptation", "Little Miss Sunshine", "Juno", "Superbad", "The Hangover", "Bridesmaids", "Anchorman", "Step Brothers", "Dumb and Dumber", "Ace Ventura", "The Mask", "Liar Liar", "Bruce Almighty", "Elf", "Groundhog Day", "Ferris Bueller's Day Off", "The Breakfast Club", "Ghostbusters", "Men in Black", "Jumanji", "Big", "Mrs. Doubtfire", "Hook", "Aladdin", "Beauty and the Beast", "The Little Mermaid", "Cinderella", "Snow White", "Pinocchio", "Bambi", "Dumbo", "Sleeping Beauty", "101 Dalmatians", "The Jungle Book", "Mulan", "Tarzan", "Hercules", "Pocahontas", "Moana", "Encanto", "Zootopia", "Big Hero 6", "Inside Out", "Brave", "Ratatouille", "Monsters, Inc.", "Cars", "A Bug's Life", "How to Train Your Dragon", "Kung Fu Panda", "Madagascar", "The Croods", "Despicable Me", "Minions", "Sing", "The Secret Life of Pets", "Trolls", "Rio", "Ice Age", "Spirited Away", "My Neighbor Totoro", "Princess Mononoke", "Howl's Moving Castle", "Your Name", "Grave of the Fireflies", "Ponyo", "The Wind Rises", "Star Trek", "Alien", "Aliens", "Predator", "RoboCop", "The Terminator", "King Kong", "Godzilla", "Pacific Rim", "The Hobbit", "Charlie and the Chocolate Factory", "Willy Wonka", "The Chronicles of Narnia", "Percy Jackson", "Eragon", "The Golden Compass", "A Series of Unfortunate Events", "Pirates of the Caribbean", "The Mummy", "National Treasure", "Indiana Jones", "Seinfeld", "Frasier", "Cheers", "MASH", "I Love Lucy", "The Fresh Prince of Bel-Air", "That 70s Show", "Malcolm in the Middle", "Everybody Loves Raymond", "King of Queens", "Two and a Half Men", "Community", "Parks and Recreation", "30 Rock", "Arrested Development", "It's Always Sunny in Philadelphia", "New Girl", "Scrubs", "Curb Your Enthusiasm", "Veep", "The Marvelous Mrs. Maisel", "Schitt's Creek", "Fleabag", "Atlanta", "Barry", "Insecure", "Grease", "Mamma Mia", "Dirty Dancing", "Footloose", "Flashdance", "Saturday Night Fever", "ER", "House", "Chicago Hope", "The Good Doctor", "New Amsterdam", "CSI: Crime Scene Investigation", "NCIS", "Law & Order", "Criminal Minds", "Bones", "Castle", "Elementary", "Sherlock Holmes", "Monk", "Columbo", "Miami Vice", "24", "Homeland", "The Americans", "Fauda", "Berlin Station", "Killing Eve", "The Night Manager", "True Blood", "The Vampire Diaries", "Supernatural", "Buffy the Vampire Slayer", "Angel", "Charmed", "Sabrina the Teenage Witch", "Penny Dreadful", "Twin Peaks", "The X-Files", "Fringe", "Lost in Space", "Stargate SG-1", "Battlestar Galactica", "Doctor Who", "Torchwood", "Firefly", "Farscape", "Babylon 5", "The Expanse", "Altered Carbon", "Love, Death & Robots", "Russian Doll", "Maniac", "Cobra Kai", "Yellowstone", "1883", "1923", "Sons of Anarchy", "Justified", "Longmire", "The Sopranos", "Boardwalk Empire", "Mad Men", "Deadwood", "Rome", "Spartacus", "The Tudors", "Reign", "The Last Kingdom", "Marco Polo", "Versailles", "House of the Dragon", "His Dark Materials", "Shadow and Bone", "The Wheel of Time", "The Umbrella Academy", "Locke & Key", "Sweet Tooth", "Snowpiercer", "The 100", "Teen Wolf", "Riverdale", "Gossip Girl", "Pretty Little Liars", "One Tree Hill", "Dawson's Creek", "The O.C.", "Skins", "13 Reasons Why", "Elite", "Sex Education", "Never Have I Ever", "On My Block", "Outer Banks", "You", "Dead to Me", "Grace and Frankie", "Orange Is the New Black", "Unbreakable Kimmy Schmidt", "BoJack Horseman", "Big Mouth", "F Is for Family", "Archer", "American Dad", "Bob's Burgers", "King of the Hill", "Futurama", "Avatar: The Last Airbender", "The Legend of Korra", "SpongeBob SquarePants", "Adventure Time", "Gravity Falls", "Steven Universe", "She-Ra and the Princesses of Power", "Teen Titans", "Young Justice", "Batman: The Animated Series", "X-Men: The Animated Series", "Samurai Jack", "Dexter's Laboratory", "The Powerpuff Girls", "Ed, Edd n Eddy", "Courage the Cowardly Dog", "Cow and Chicken", "Johnny Bravo"];
-
-const ANIME_AR = ["مونكي دي لوفي", "رورونوا زورو", "نامي", "أوسوب", "سانجي", "توني توني تشوبر", "نيكو روبن", "فرانكي", "بروك", "جينبي", "بورتغاس دي إيس", "ترافالجار لو", "بوا هانكوك", "شانكس", "نفرتاري فيفي", "دونكيشوت دوفلامينجو", "كايدو", "بيج مام", "بلاكبيرد", "دراكيول ميهوك", "سابو", "باجي", "وايت بيرد", "كروكودايل", "سموكر", "جارب", "ياماتو", "كاتاكوري", "ناروتو أوزوماكي", "ساسكي أوتشيها", "ساكورا هارونو", "كاكاشي هاتاكي", "إيتاتشي أوتشيها", "جيرايا", "مايت جاي", "روك لي", "نيجي هيوجا", "هيناتا هيوجا", "شيكامارو نارا", "جارا", "أوروتشيمارو", "تسونادي", "ميناتو ناميكازي", "أوبيتو أوتشيها", "مادارا أوتشيها", "باين", "كونان", "كيسامي هوشيجاكي", "دايدارا", "ساسوري", "كيبا إينوزوكا", "تشوجي أكيميتشي", "إينو ياماناكا", "تينتين", "كيلر بي", "بوروتو أوزوماكي", "سارادا أوتشيها", "جوكو", "فيجيتا", "بيكولو", "جوهان", "ترانكس", "بولما", "كرلين", "ماستر روشي", "فريزا", "سيل", "ماجين بو", "بيروس", "ويس", "برولي", "الأندرويد 18", "الأندرويد 17", "يامتشا", "تين شينهان", "تشي تشي", "جوتين", "فيديل", "زاماسو", "جيرين", "إيرين ييجر", "ميكاسا أكرمان", "أرمين أرليرت", "ليفاي أكرمان", "إيروين سميث", "هيستوريا ريس", "راينر براون", "زيك ييجر", "آني ليونهارت", "جين كيرشتاين", "ساشا بلوز", "كوني سبرينجر", "هانجي زوي", "ايمير", "برتولد هوفر", "جابي براون", "فالكو جرايس", "لايت ياجامي", "إل لوليت", "ميسا أمانه", "ريوك", "نير", "ميلو", "سويتشيرو ياجامي", "واتاري", "تانجيرو كامادو", "نيزوكو كامادو", "زينيتسو أجاتسوما", "إينوسكي هاشيبيرا", "جيو توميوكا", "شينوبو كوتشو", "كيوجورو رينجوكو", "تينجن أوزوي", "موزان كيبوتسوجي", "أكازا", "ميتسوري كانروجي", "أوباناي إيجورو", "جيومي هيميجيما", "سانيمي شينازوجاوا", "إيزوكو ميدوريا", "كاتسوكي باكوجو", "أوتشاكو أوراراكا", "شوتو تودوروكي", "أول مايت", "تومورا شيجاراكي", "تينيا إيدا", "إيجيرو كيريشيما", "مومو ياويوروزو", "دينكي كاميناري", "إنديفور", "توجا هيميكو", "دابي", "أيزاوا شوتا", "هوكس", "ستين", "أول فور ون", "إيتشيجو كوروساكي", "روكيا كوتشيكي", "بياكويا كوتشيكي", "كينباتشي زاراكي", "توشيرو هيتسوجايا", "أوريهيمي إينوي", "أوريو إيشيدا", "يوروايتشي شيهوين", "سوسكي آيزن", "رينجي أبراي", "جريمجاو جاجرجاك", "أولكيورا سيفير", "كيسكي أوراهارا", "يوجي إيتادوري", "ميجومي فوشيجورو", "نوبارا كوجيساكي", "ساتورو جوجو", "سوكونا", "نانامي كينتو", "ماكي زينين", "توجي إينوماكي", "باندا", "يوتا أوكوتسو", "ماهيتو", "سوجورو جيتو", "إدوارد إلريك", "ألفونس إلريك", "روي موستانج", "وينري روكبيل", "ريزا هوكآي", "ألكسندر لويس أرمسترونج", "سكار", "إينفي", "لاست", "جلاتوني", "الأب", "الملك برادلي", "جون فريكس", "كيلوا زولديك", "كورابيكا", "ليوريو بارادينايت", "هيسوكا مورو", "كرولو لوسيلفر", "ميروم", "نيتيرو", "كايت", "إيلومي زولديك", "سايتاما", "جينوس", "تاتسوماكي", "فوبوكي", "الملك", "بانج", "سبيد أوف ساوند سونيك", "جارو", "مومين رايدر", "كين كانيكي", "توكا كيريشيما", "ريزي كاميشيرو", "كيشو أريما", "جوزو سوزويا", "شو تسوكياما", "نيشيكي نيشيو", "هيديوشي ناجاتشيكا", "أوسوجي تسوكينو", "آمي ميزونو", "ريي هينو", "ماكوتو كينو", "ميناكو أينو", "مامورو تشيبا", "تشيبيوسا", "سيلور مون", "سيلور ميركوري", "سيلور مارس", "سيلور جوبيتر", "سيلور فينوس", "توكسيدو ماسك", "ناتسو دراجنيل", "لوسي هارتفيليا", "جراي فولباستر", "إرزا سكارليت", "ويندي مارفيل", "هابي", "جاجيل ريدفوكس", "جوفيا لوكسر", "ميراجين شتراوس", "لاكسوس دريار", "زيريف", "أكنولوجيا", "شينجي إيكاري", "ري أيانامي", "أسوكا لانجلي سوريو", "ميساتو كاتسوراجي", "جيندو إيكاري", "كاورو ناجيسا", "لولوش لامبيروج", "سوزاكو كوروروجي", "سي سي", "كالين كوزوكي", "نانالي لامبيروج", "لويد فورجر", "يور فورجر", "آنيا فورجر", "بوند فورجر", "دميان ديسموند", "دينجي", "باور", "آكي هاياكاوا", "ماكيما", "هيمينو", "كيشيبي", "شويو هيناتا", "توبيو كاجياما", "كي تسوكيشيما", "تاداشي ياماجوتشي", "دايتشي ساوامورا", "كوشي سوجاوارا", "ريونوسوكي تاناكا", "نيشينويا يو", "كينما كوزومي", "كوروأو تتسورو", "أوشيجيما واكاتوشي", "أويكاوا تورو", "إيوايزومي هاجيمي", "بوكوتو كوتارو", "أكاآشي كيجي", "هاناميتشي ساكوراجي", "كايدي روكاوا", "هيساشي ميتسوي", "ريوتا ميياجي", "تاكينوري أكاجي", "إنوياشا", "كاجومي هيجوراشي", "ميروكو", "سانجو", "شيبو", "سيشومارو", "ناراكو", "كيكيو", "يوسكي أوراميشي", "كازوما كوابارا", "كوراما", "هيي", "جينكاي", "كوينما", "توجورو", "كينشين هيمورا", "كاورو كاميا", "سانوسوكي ساجارا", "ياهيكو ميوجين", "أوشي شينوموري", "جوناثان جوستار", "جوزيف جوستار", "جوتارو كوجو", "جوسوكي هيجاشيكاتا", "جيورنو جيوفانا", "جولين كوجو", "ديو براندو", "بولنارف", "كاكيوين", "سييا بيجاسوس", "شيريو", "هيوجا", "شون", "إيكي", "ساوري كيدو", "يوجي موتو", "سيتو كايبا", "جوي ويلر", "تيا جاردنر", "تريستان تايلور", "باكورا ريو", "ماريك إشتار", "بيجاسوس", "ماي فالنتاين", "آش كيتشوم", "بيكاتشو", "ميستي", "بروك", "جيسي", "جيمس", "مياوث", "جاري أوك", "ماي", "داون", "سيرينا", "البروفيسور أوك", "تاي كامييا", "مات إيشيدا", "سورا تاكينوتشي", "إيزي إيزومي", "ميمي تاتشيكاوا", "جو كيدو", "تي كيه تاكايشي", "كاري كامييا", "أجومون", "جابومون", "باتامون", "ساكورا كينوموتو", "شاورن لي", "تومويو دايدوجي", "كيرو", "يوكيتو تسوكيشيرو", "رينتارو أوكابي", "كوريسو ماكيسي", "مايوري شيينا", "إيتارو هاشيدا", "فيوليت إيفرجاردن", "جيلبرت بوجينفيليا", "كلوديا هودجينز", "سوبارو ناتسوكي", "إميليا", "ريم", "رام", "بياتريس", "روزوال ال ماذرز", "كازوما ساتو", "أكوا", "ميجومين", "داركنس", "عين زد أوول جاون", "ألبيدو", "شالتير بلادفالن", "ديميرجي", "شيجيو كاجياما", "ريجين أراتاكا", "ديمبل", "ثورفين", "أسكيلاد", "ثورس", "كانوت", "أستا", "يونو", "نويل سيلفا", "يامي سوكيهيرو", "ناخت فاوست", "شينرا كوساكابي", "آرثر بويل", "آيريس", "إيما", "نورمان", "راي", "إيزابيلا", "سينكو إيشيجامي", "تايجو أوكي", "يوزوريها أوجاوا", "تسوكاسا شيشيو", "كورو سينسي", "ناجيسا شيوتا", "كارما أكاباني", "كاجويا شينوميا", "مييوكي شيروجاني", "تشيكا فوجيوارا", "ريوجي تاكاسو", "تايجا أيساكا", "مينوري كوشيدا", "يوساكو كيتاماني", "تومويا أوكازاكي", "ناجيسا فوروكاوا", "كوسي أريما", "كاوري ميازونو", "توهرو هوندا", "كيو سوهما", "يوكي سوهما", "شيجوري سوهما", "أكيتو سوهما", "أتسوشي ناكاجيما", "أوسامو دازاي", "دوبو كونيكيدا", "رانبو إيدوجاوا", "تشويا ناكاهارا", "ميليوداس", "إليزابيث ليونيس", "بان", "الملك كينج", "ديان", "ميرلين", "إسكانور", "جاوثر", "يويتشي إيساجي", "ميجورو باتشيرا", "رينسوكي كونيجامي", "ريو ميكاجي", "سيشيرو ناجي", "رين إيتوشي", "دوما", "كوكوشيبو", "داكي", "جيوتارو", "جينتوكي ساكاتا", "شينباتشي شيمورا", "كاجورا", "هيجيكاتا توشيرو", "سوجو أوكيتا", "كونوهامارو سارتوبي", "أسوما سارتوبي", "كوريناي يوهي", "إيروكا أومينو", "توبيراما سينجو", "هاشيراما سينجو", "شارلوت كاتاكوري", "يوستاس كيد", "بارثولوميو كوما", "إكس دريك", "باسيل هوكينز", "كابوني بيجي", "ماركو بوت", "ايمير فريتز", "جريشا ييجر", "دوت بيكسيس", "نايل داوك", "كانااو تسويوري", "جينيا شينازوجاوا", "يوشيرو", "تامايو", "ميريو توجاتا", "نيجيري هادو", "فوميكاجي توكويامي", "مينا أشيدو", "تسويو أسوي", "ميزو شوجي", "نيكو أولفيا", "مونكي دي دراجون", "فينزموك ريجو", "فينزموك جادج", "شارلوت لينلين", "شارلوت بودينج", "روب لوتشي", "نفرتاري كوبرا", "سيلفرز رايلي", "ماركو الفينيق", "كاروت", "سينجوكو", "أوكيجي", "كيزارو", "أكاينو", "أوزوماكي هيماواري", "ميتسوكي", "ميتال لي", "تشو تشو أكيميتشي", "إينوجين ياماناكا", "شيكاداي نارا", "شين أوتشيها", "كاجويا أوتسوتسكي", "هاجورومو أوتسوتسكي", "جوكو بلاك", "هيت", "تشامبا", "فادوس", "بولا", "مارون", "السيد ساتان", "الجنرال بلو", "الدكتور جيرو", "بيك فينجر", "بوركو جاليارد", "كولت جرايس", "ماجات", "تيرو ميكامي", "كيومي تاكادا", "نعومي ميسورا", "كاجايا أوبوياشيكي", "أماني أوبوياشيكي", "كاناي كوتشو", "سابيتو", "ماكومو", "روي", "إينمو", "كيوجاي", "توشينوري ياجي", "نيزو", "ريكفري جيرل", "بريزنت مايك", "ميدنايت", "أوفرهول", "توايس", "السيد كومبريس", "سبينر", "جيجانتوماشيا", "جينريوساي ياماموتو", "شونسوي كيوراكو", "جوشيرو أوكيتاكي", "سوي فون", "مايوري كوروتسوتشي", "ريتسو أونوهانا", "ساجين كومامورا", "كانامي توسين", "كويوتي ستارك", "نويترا جيلجا", "باراجان لويسنبارن", "هاليبيل", "نيل تو", "تشاد ياسوتورا", "ميوا كاسومي", "كوكيتشي موتا", "ميجيل", "شوكو إيري", "أوي تودو", "يوكي تسوكومو", "كينجي هاكاري", "هيرومي هيجوروما", "تشوسو", "ريكو أماناي", "ماي زينين", "هوهنهايم", "إيزومي كورتيس", "مايس هيوز", "أوليفير ميرا أرمسترونج", "لينج ياو", "ماي تشانج", "جريد", "برايد", "سولف جي كيمبلي", "نيفيربيتو", "شايابوف", "يوبي", "بيسكوت كروجر", "ناكل باين", "موريل ماكرنيسي", "شوت مكماهون", "فيتان", "فينكس", "نوبوناجا هازاما", "ماتشي كوماسين", "شالنارك", "فرانكلين بوردو", "ميتال بات", "زومبي مان", "واتشدوج مان", "سيلفرفانج", "أتوميك ساموراي", "تشايلد إمبرور", "بوري بوري بريزونر", "سوبرألوي داركشاين", "كوتارو أمون", "أكيرا مادو", "سيدو تاكيزاوا", "إيتو يوشيمورا", "فوروتا نيمورا", "سيلور بلوتو", "سيلور أورانوس", "سيلور نيبتون", "سيلور ساترن", "الملكة بيريل", "الملكة سيرينيتي", "جيلدارتس كلايف", "كانا ألبيرونا", "ليون فاستيا", "ألتير ميلكوفيتش", "جيلال فرنانديز", "إجنيل", "كوبرا إريك", "ريوجي كاجي", "فويوتسوكي كوزو", "نااوكو أكاجي", "ريتسوكو أكاجي", "توجي سوزوهارا", "هيكاري هوراكي", "كينسوكي أيدا", "مايا إيبوكي", "ماكوتو هيوجا", "جيرمايا جوتوالد", "كورنيليا لي بريتانيا", "يوفيميا لي بريتانيا", "رولو لامبيروج", "ميلي أشفورد", "شيرلي فينيت", "نينا آينشتاين", "يوري فورجر", "فيونا فروست", "فرانكي فرانكلين", "سيلفيا شيروود", "ريزي", "الملاك الشيطان", "كوانشي", "يورو شيطان الحرب", "نايوتا", "مدرب كاراسونو أوكاي", "ياكو موريسوكي", "كونوها", "تيندو", "أتسومو مييا", "أوسامو مييا", "كيومي ساكوسا"];
-const ANIME_EN = ["Monkey D. Luffy", "Roronoa Zoro", "Nami", "Usopp", "Sanji", "Tony Tony Chopper", "Nico Robin", "Franky", "Brook", "Jinbe", "Portgas D. Ace", "Trafalgar Law", "Boa Hancock", "Shanks", "Nefertari Vivi", "Donquixote Doflamingo", "Kaido", "Big Mom", "Blackbeard", "Dracule Mihawk", "Sabo", "Buggy", "Whitebeard", "Crocodile", "Smoker", "Garp", "Yamato", "Katakuri", "Naruto Uzumaki", "Sasuke Uchiha", "Sakura Haruno", "Kakashi Hatake", "Itachi Uchiha", "Jiraiya", "Might Guy", "Rock Lee", "Neji Hyuga", "Hinata Hyuga", "Shikamaru Nara", "Gaara", "Orochimaru", "Tsunade", "Minato Namikaze", "Obito Uchiha", "Madara Uchiha", "Pain", "Konan", "Kisame Hoshigaki", "Deidara", "Sasori", "Kiba Inuzuka", "Choji Akimichi", "Ino Yamanaka", "Tenten", "Killer Bee", "Boruto Uzumaki", "Sarada Uchiha", "Goku", "Vegeta", "Piccolo", "Gohan", "Trunks", "Bulma", "Krillin", "Master Roshi", "Frieza", "Cell", "Majin Buu", "Beerus", "Whis", "Broly", "Android 18", "Android 17", "Yamcha", "Tien Shinhan", "Chi-Chi", "Goten", "Videl", "Zamasu", "Jiren", "Eren Yeager", "Mikasa Ackerman", "Armin Arlert", "Levi Ackerman", "Erwin Smith", "Historia Reiss", "Reiner Braun", "Zeke Yeager", "Annie Leonhart", "Jean Kirstein", "Sasha Blouse", "Connie Springer", "Hange Zoe", "Ymir", "Bertholdt Hoover", "Gabi Braun", "Falco Grice", "Light Yagami", "L Lawliet", "Misa Amane", "Ryuk", "Near", "Mello", "Soichiro Yagami", "Watari", "Tanjiro Kamado", "Nezuko Kamado", "Zenitsu Agatsuma", "Inosuke Hashibira", "Giyu Tomioka", "Shinobu Kocho", "Kyojuro Rengoku", "Tengen Uzui", "Muzan Kibutsuji", "Akaza", "Mitsuri Kanroji", "Obanai Iguro", "Gyomei Himejima", "Sanemi Shinazugawa", "Izuku Midoriya", "Katsuki Bakugo", "Ochaco Uraraka", "Shoto Todoroki", "All Might", "Tomura Shigaraki", "Tenya Iida", "Eijiro Kirishima", "Momo Yaoyorozu", "Denki Kaminari", "Endeavor", "Toga Himiko", "Dabi", "Aizawa Shota", "Hawks", "Stain", "All For One", "Ichigo Kurosaki", "Rukia Kuchiki", "Byakuya Kuchiki", "Kenpachi Zaraki", "Toshiro Hitsugaya", "Orihime Inoue", "Uryu Ishida", "Yoruichi Shihoin", "Sosuke Aizen", "Renji Abarai", "Grimmjow Jaegerjaquez", "Ulquiorra Cifer", "Kisuke Urahara", "Yuji Itadori", "Megumi Fushiguro", "Nobara Kugisaki", "Satoru Gojo", "Sukuna", "Nanami Kento", "Maki Zenin", "Toge Inumaki", "Panda", "Yuta Okkotsu", "Mahito", "Suguru Geto", "Edward Elric", "Alphonse Elric", "Roy Mustang", "Winry Rockbell", "Riza Hawkeye", "Alex Louis Armstrong", "Scar", "Envy", "Lust", "Gluttony", "Father", "King Bradley", "Gon Freecss", "Killua Zoldyck", "Kurapika", "Leorio Paradinight", "Hisoka Morow", "Chrollo Lucilfer", "Meruem", "Netero", "Kite", "Illumi Zoldyck", "Saitama", "Genos", "Tatsumaki", "Fubuki", "King", "Bang", "Speed-o'-Sound Sonic", "Garou", "Mumen Rider", "Ken Kaneki", "Touka Kirishima", "Rize Kamishiro", "Kishou Arima", "Juzo Suzuya", "Shuu Tsukiyama", "Nishiki Nishio", "Hideyoshi Nagachika", "Usagi Tsukino", "Ami Mizuno", "Rei Hino", "Makoto Kino", "Minako Aino", "Mamoru Chiba", "Chibiusa", "Sailor Moon", "Sailor Mercury", "Sailor Mars", "Sailor Jupiter", "Sailor Venus", "Tuxedo Mask", "Natsu Dragneel", "Lucy Heartfilia", "Gray Fullbuster", "Erza Scarlet", "Wendy Marvell", "Happy", "Gajeel Redfox", "Juvia Lockser", "Mirajane Strauss", "Laxus Dreyar", "Zeref", "Acnologia", "Shinji Ikari", "Rei Ayanami", "Asuka Langley Soryu", "Misato Katsuragi", "Gendo Ikari", "Kaworu Nagisa", "Lelouch Lamperouge", "Suzaku Kururugi", "C.C.", "Kallen Kozuki", "Nunnally Lamperouge", "Loid Forger", "Yor Forger", "Anya Forger", "Bond Forger", "Damian Desmond", "Denji", "Power", "Aki Hayakawa", "Makima", "Himeno", "Kishibe", "Shoyo Hinata", "Tobio Kageyama", "Kei Tsukishima", "Tadashi Yamaguchi", "Daichi Sawamura", "Koshi Sugawara", "Ryunosuke Tanaka", "Nishinoya Yu", "Kenma Kozume", "Kuroo Tetsurou", "Ushijima Wakatoshi", "Oikawa Tooru", "Iwaizumi Hajime", "Bokuto Koutarou", "Akaashi Keiji", "Pan", "Uub", "Oolong", "Puar", "Yajirobe", "Hanamichi Sakuragi", "Kaede Rukawa", "Hisashi Mitsui", "Ryota Miyagi", "Takenori Akagi", "Inuyasha", "Kagome Higurashi", "Miroku", "Sango", "Shippo", "Sesshomaru", "Naraku", "Kikyo", "Yusuke Urameshi", "Kazuma Kuwabara", "Kurama", "Hiei", "Genkai", "Koenma", "Toguro", "Kenshin Himura", "Kaoru Kamiya", "Sanosuke Sagara", "Yahiko Myojin", "Aoshi Shinomori", "Jonathan Joestar", "Joseph Joestar", "Jotaro Kujo", "Josuke Higashikata", "Giorno Giovanna", "Jolyne Cujoh", "Dio Brando", "Polnareff", "Kakyoin", "Pegasus Seiya", "Shiryu", "Hyoga", "Shun", "Ikki", "Saori Kido", "Yugi Muto", "Seto Kaiba", "Joey Wheeler", "Tea Gardner", "Tristan Taylor", "Bakura Ryou", "Marik Ishtar", "Pegasus", "Mai Valentine", "Ash Ketchum", "Pikachu", "Misty", "Brock", "Jessie", "James", "Meowth", "Gary Oak", "May", "Dawn", "Serena", "Professor Oak", "Tai Kamiya", "Matt Ishida", "Sora Takenouchi", "Izzy Izumi", "Mimi Tachikawa", "Joe Kido", "T.K. Takaishi", "Kari Kamiya", "Agumon", "Gabumon", "Patamon", "Sakura Kinomoto", "Syaoran Li", "Tomoyo Daidouji", "Kero", "Yukito Tsukishiro", "Rintaro Okabe", "Kurisu Makise", "Mayuri Shiina", "Itaru Hashida", "Violet Evergarden", "Gilbert Bougainvillea", "Claudia Hodgins", "Subaru Natsuki", "Emilia", "Rem", "Ram", "Beatrice", "Roswaal L Mathers", "Kazuma Sato", "Aqua", "Megumin", "Darkness", "Ainz Ooal Gown", "Albedo", "Shalltear Bloodfallen", "Demiurge", "Shigeo Kageyama", "Reigen Arataka", "Dimple", "Thorfinn", "Askeladd", "Thors", "Canute", "Asta", "Yuno", "Noelle Silva", "Yami Sukehiro", "Nacht Faust", "Shinra Kusakabe", "Arthur Boyle", "Iris", "Emma", "Norman", "Ray", "Isabella", "Senku Ishigami", "Taiju Oki", "Yuzuriha Ogawa", "Tsukasa Shishio", "Koro-sensei", "Nagisa Shiota", "Karma Akabane", "Kaguya Shinomiya", "Miyuki Shirogane", "Chika Fujiwara", "Ryuji Takasu", "Taiga Aisaka", "Minori Kushieda", "Yusaku Kitamura", "Tomoya Okazaki", "Nagisa Furukawa", "Kousei Arima", "Kaori Miyazono", "Tohru Honda", "Kyo Sohma", "Yuki Sohma", "Shigure Sohma", "Akito Sohma", "Atsushi Nakajima", "Osamu Dazai", "Doppo Kunikida", "Ranpo Edogawa", "Chuya Nakahara", "Meliodas", "Elizabeth Liones", "Ban", "Diane", "Merlin", "Escanor", "Gowther", "Yoichi Isagi", "Meguru Bachira", "Rensuke Kunigami", "Reo Mikage", "Seishiro Nagi", "Rin Itoshi", "Doma", "Kokushibo", "Daki", "Gyutaro", "Gintoki Sakata", "Shinpachi Shimura", "Kagura", "Hijikata Toshiro", "Sougo Okita", "Konohamaru Sarutobi", "Asuma Sarutobi", "Kurenai Yuhi", "Iruka Umino", "Tobirama Senju", "Hashirama Senju", "Charlotte Katakuri", "Eustass Kid", "Bartholomew Kuma", "X Drake", "Basil Hawkins", "Capone Bege", "Marco Bott", "Ymir Fritz", "Grisha Yeager", "Dot Pixis", "Nile Dawk", "Kanao Tsuyuri", "Genya Shinazugawa", "Yushiro", "Tamayo", "Mirio Togata", "Nejire Hado", "Fumikage Tokoyami", "Mina Ashido", "Tsuyu Asui", "Mezo Shoji", "Nico Olvia", "Monkey D. Dragon", "Monkey D. Garp", "Vinsmoke Reiju", "Vinsmoke Judge", "Charlotte Linlin", "Charlotte Pudding", "Rob Lucci", "Nefeltari Cobra", "Silvers Rayleigh", "Marco the Phoenix", "Carrot", "Sengoku", "Aokiji", "Kizaru", "Akainu", "Sakazuki", "Uchiha Sarada", "Uzumaki Himawari", "Mitsuki", "Metal Lee", "Chocho Akimichi", "Inojin Yamanaka", "Shikadai Nara", "Shin Uchiha", "Kaguya Otsutsuki", "Hagoromo Otsutsuki", "Goku Black", "Hit", "Champa", "Vados", "Bulla", "Marron", "Mr. Satan", "General Blue", "Dr. Gero", "Pieck Finger", "Porco Galliard", "Colt Grice", "Magath", "Teru Mikami", "Kiyomi Takada", "Naomi Misora", "Kagaya Ubuyashiki", "Amane Ubuyashiki", "Kanae Kocho", "Sabito", "Makomo", "Rui", "Enmu", "Kyogai", "Toshinori Yagi", "Nezu", "Recovery Girl", "Present Mic", "Midnight", "Overhaul", "Twice", "Mr. Compress", "Spinner", "Gigantomachia", "Genryusai Yamamoto", "Shunsui Kyoraku", "Jushiro Ukitake", "Soi Fon", "Mayuri Kurotsuchi", "Retsu Unohana", "Sajin Komamura", "Kaname Tosen", "Coyote Starrk", "Nnoitra Gilga", "Barragan Luisenbarn", "Halibel", "Nel Tu", "Chad Yasutora", "Miwa Kasumi", "Kokichi Muta", "Kasumi Miwa", "Miguel", "Shoko Ieiri", "Aoi Todo", "Yuki Tsukumo", "Kinji Hakari", "Hiromi Higuruma", "Choso", "Riko Amanai", "Mai Zenin", "Hohenheim", "Izumi Curtis", "Maes Hughes", "Olivier Mira Armstrong", "Ling Yao", "May Chang", "Greed", "Pride", "Solf J. Kimblee", "Neferpitou", "Shaiapouf", "Youpi", "Biscuit Krueger", "Knuckle Bine", "Morel Mackernasey", "Shoot McMahon", "Feitan", "Phinks", "Nobunaga Hazama", "Machi Komacine", "Shalnark", "Franklin Bordeau", "Metal Bat", "Zombieman", "Watchdog Man", "Silverfang", "Atomic Samurai", "Child Emperor", "Puri-Puri Prisoner", "Superalloy Darkshine", "Kotaro Amon", "Akira Mado", "Seidou Takizawa", "Eto Yoshimura", "Furuta Nimura", "Sailor Pluto", "Sailor Uranus", "Sailor Neptune", "Sailor Saturn", "Queen Beryl", "Queen Serenity", "Gildarts Clive", "Cana Alberona", "Lyon Vastia", "Ultear Milkovich", "Jellal Fernandes", "Igneel", "Cobra Erik", "Ryoji Kaji", "Fuyutsuki Kozo", "Naoko Akagi", "Ritsuko Akagi", "Toji Suzuhara", "Hikari Horaki", "Kensuke Aida", "Maya Ibuki", "Makoto Hyuga", "Jeremiah Gottwald", "Cornelia li Britannia", "Euphemia li Britannia", "Rolo Lamperouge", "Milly Ashford", "Shirley Fenette", "Nina Einstein", "Yuri Forger", "Fiona Frost", "Franky Franklin", "Sylvia Sherwood", "Reze", "Angel Devil", "Quanxi", "Yoru the War Devil", "Nayuta", "Coach Ukai", "Yaku Morisuke", "Konoha", "Tendou", "Atsumu Miya", "Osamu Miya", "Kiyoomi Sakusa"];
-
-/* =========================================================
-   PACK DEFINITIONS (per language)
-   Each pack has: key, icon, name(ar/en), words(ar/en)
+   PACK DEFINITIONS (سحب مباشر بأسماء ملفاتك)
    ========================================================= */
 const PACKS = {
-  movies_series: {
+  arabicMovies: {
     icon: '🎬',
-    name: { ar: 'أفلام ومسلسلات', en: 'Movies & TV Shows' },
-    words: { ar: MOVIES_AR, en: MOVIES_EN }
+    name: { ar: 'أفلام عربية', en: 'Arabic Movies' },
+    filename: 'arabicMovies.json',
+    words: []
   },
-  football: {
+  englishMovies: {
+    icon: '🎥',
+    name: { ar: 'أفلام أجنبية', en: 'English Movies' },
+    filename: 'englishMovies.json',
+    words: []
+  },
+  players: {
     icon: '⚽',
-    name: { ar: 'لاعبين كرة القدم', en: 'Football Players' },
-    words: { ar: FOOTBALL_WORDS, en: FOOTBALL_WORDS }
+    name: { ar: 'لاعيبة كرة قدم', en: 'Football Players' },
+    filename: 'players.json',
+    words: []
   },
   anime: {
     icon: '🀄',
-    name: { ar: 'شخصيات أنمي', en: 'Anime Characters' },
-    words: { ar: ANIME_AR, en: ANIME_EN }
+    name: { ar: 'أنمي', en: 'Anime' },
+    filename: 'anime.json',
+    words: []
   }
 };
-const PACK_ORDER = ['movies_series', 'football', 'anime'];
+const PACK_ORDER = ['arabicMovies', 'englishMovies', 'players', 'anime'];
+
+let dataLoaded = false;
+
+async function loadAllData() {
+  const loadPromises = PACK_ORDER.map(async (key) => {
+    try {
+      const res = await fetch(PACKS[key].filename);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const json = await res.json();
+      // يدعم لو الملف عبارة عن مصفوفة كلمات مباشرة
+      if (Array.isArray(json)) {
+        PACKS[key].words = json;
+      } else if (json.words && Array.isArray(json.words)) {
+        PACKS[key].words = json.words;
+      } else {
+        // لو مصفوفة داخل كีย์ تاني
+        PACKS[key].words = Object.values(json)[0] || [];
+      }
+    } catch (err) {
+      console.error(`Error loading pack ${key}:`, err);
+    }
+  });
+
+  await Promise.all(loadPromises);
+  dataLoaded = true;
+  const startBtn = $('startGameBtn');
+  startBtn.disabled = false;
+  startBtn.innerHTML = t('ابدأ اللعب 🎬', '🎬 START GAME');
+}
 
 /* =========================================================
    STATE
    ========================================================= */
 const state = {
   lang: 'ar',
-  selectedPacks: ['movies_series'],   // array of pack keys, multi-select
+  selectedPacks: ['arabicMovies'],
   timerDuration: 60,
   teamCount: 2,
-  teamNames: [],
-  teams: [],          // [{ name, score }]
+  teams: [],
   currentTeamIndex: 0,
   wordQueue: [],
   lastWord: null,
   timeLeft: 60,
   timerId: null,
   roundActive: false,
-  targetScore: 5,      // bumps to 6 on a 4-4 tie (deuce rule)
+  targetScore: 5,
   deuceTriggered: false,
   gameOver: false,
   winner: null,
-  lastOutcome: null,   // 'correct' | 'timeout'
 };
 
 const $ = (id) => document.getElementById(id);
@@ -365,7 +369,7 @@ function toast(text) {
 }
 
 /* =========================================================
-   AUDIO (Web Audio API — no external files)
+   AUDIO
    ========================================================= */
 let audioCtx = null;
 function ensureAudio() {
@@ -396,24 +400,23 @@ function buzzSound() {
 function correctSound() { beep(1046, 0.12, 'sine', 0.16); setTimeout(() => beep(1318, 0.14, 'sine', 0.16), 90); }
 
 /* =========================================================
-   NAVIGATION HELPERS
+   NAVIGATION
    ========================================================= */
 function showScreen(id) {
   ['screen-lang', 'screen-setup', 'screen-game'].forEach((s) => {
-    $(s).classList.toggle('hidden', s !== id);
-    $(s).classList.toggle('flex', s === id);
+    $(s).classList.toggle('hidden', s !== id);$(s).classList.toggle('flex', s === id);
   });
 }
 
-/* =========================================================
-   SCREEN 1 — LANGUAGE SELECT
-   ========================================================= */
 document.querySelectorAll('.lang-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     ensureAudio();
     state.lang = btn.dataset.lang;
     buildSetupScreen();
     showScreen('screen-setup');
+    if (!dataLoaded) {
+      loadAllData();
+    }
   });
 });
 
@@ -424,26 +427,26 @@ const HOW_TO_TEXT = {
     title: 'قواعد اللعبة',
     lines: [
       '🎯 كل فريق ياخد دوره يمثل كلمة والباقيين يخمنوا.',
-      '🗂️ اختار فئة أو أكتر؛ لو اخترت أكتر من فئة، الكلمات بتتسحب عشوائي من كله.',
+      '🗂️ اختار فئة أو أكتر؛ لو اخترت أكتر من فئة، الكلمات بتتسحب عشوائي.',
       '👆 اضغط "اظهار الكلمة" وابدأ التمثيل فورًا.',
       '⏱️ كلمة واحدة بس في كل دور، والعداد بيعد تنازلي.',
       '✅ لو الفريق خمن صح دوس "صح +1" وينتهي الدور فورًا.',
       '⏰ لو الوقت خلص من غير تخمين، الفريق ياخد صفر وينتقل الدور.',
       '🏆 أول فريق يوصل لـ 5 نقاط يكسب.',
-      '🔥 لو الفريقين اتعادلوا 4-4، الهدف بيزيد لـ 6 نقاط لحسم النتيجة.'
+      '🔥 لو الفريقين اتعادلوا 4-4، الهدف بيزيد لـ 6 نقاط.'
     ]
   },
   en: {
     title: 'How to Play',
     lines: [
-      '🎯 Each team takes a turn acting out a word for the others to guess.',
-      '🗂️ Pick one or more packs; with multiple packs, words are pulled randomly across all of them.',
+      '🎯 Each team takes a turn acting out a word for others to guess.',
+      '🗂️ Pick one or more packs; words are pulled randomly.',
       '👆 Tap "Reveal Word" and start acting immediately.',
       '⏱️ Only one word per turn, timer counts down.',
-      '✅ If guessed correctly, tap "Correct +1" — the turn ends right away.',
-      '⏰ If time runs out with no guess, the team gets 0 and the turn ends.',
+      '✅ If guessed correctly, tap "Correct +1".',
+      '⏰ If time runs out, the team gets 0.',
       '🏆 First team to reach 5 points wins.',
-      '🔥 If both teams tie 4-4, the target rises to 6 points to break the tie.'
+      '🔥 If both teams tie 4-4, target rises to 6.'
     ]
   }
 };
@@ -452,7 +455,6 @@ $('howToPlayBtn').addEventListener('click', () => {
   const dict = HOW_TO_TEXT[state.lang];
   $('howToTitle').textContent = dict.title;
   $('howToBody').innerHTML = dict.lines.map((l) => `<div>${l}</div>`).join('');
-  $('howToBody').className = `text-sm text-zinc-300 leading-relaxed text-right space-y-2 ${state.lang === 'ar' ? 'arabic' : ''}`;
   $('closeHowToBtn').textContent = t('تمام، فهمت', 'Got it');
   $('howToModal').classList.remove('hidden');$('howToModal').classList.add('flex');
 });
@@ -460,32 +462,28 @@ $('closeHowToBtn').addEventListener('click', () => {
   $('howToModal').classList.add('hidden');$('howToModal').classList.remove('flex');
 });
 
-/* =========================================================
-   SCREEN 2 — SETUP
-   ========================================================= */
 function t(ar, en) { return state.lang === 'ar' ? ar : en; }
-
-function packWordCount(key) {
-  return PACKS[key].words[state.lang].length;
-}
 
 function updateCategoryHint() {
   const n = state.selectedPacks.length;
-  $('categoryHint').textContent = n > 0
-    ? `${n} ${t('فئة مختارة', n === 1 ? 'pack selected' : 'packs selected')}`
-    : t('اختار فئة واحدة على الأقل', 'Select at least one pack');
+  $('categoryHint').textContent = n > 0 ? `${n} ${t('فئة مختارة', 'packs selected')}` : t('اختار فئة واحدة على الأقل', 'Select at least one');
 }
 
 function buildSetupScreen() {
   $('setupTitle').textContent = t('التمثيل', 'ACT IT OUT');
-  $('labelCategory').textContent = t('اختار فئة أو أكتر', 'CHOOSE ONE OR MORE PACKS');
-  $('labelTimer').textContent = t('مدة الوقت', 'TIMER DURATION');
-  $('labelTeams').textContent = t('عدد الفرق', 'NUMBER OF TEAMS');
-  $('labelNames').textContent = t('أسماء الفرق (اختياري)', 'TEAM NAMES (OPTIONAL)');
-  $('startGameBtn').innerHTML = t('ابدأ اللعب 🎬', '🎬 START GAME');
+  $('labelCategory').textContent = t('اختار فئة أو أكتر', 'CHOOSE PACKS');
+  $('labelTimer').textContent = t('مدة الوقت', 'TIMER');
+  $('labelTeams').textContent = t('عدد الفرق', 'TEAMS');
+  $('labelNames').textContent = t('أسماء الفرق (اختياري)', 'TEAM NAMES');
+  
+  if (dataLoaded) {
+    $('startGameBtn').innerHTML = t('ابدأ اللعب 🎬', '🎬 START GAME');
+  } else {
+    $('startGameBtn').innerHTML = t('جاري تحميل البيانات... ⏳', 'Loading Data... ⏳');
+  }
+  
   document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
 
-  // Category grid — multi-select toggle cards
   const grid = $('categoryGrid');
   grid.innerHTML = '';
   if (state.selectedPacks.length === 0) state.selectedPacks = [PACK_ORDER[0]];
@@ -495,8 +493,7 @@ function buildSetupScreen() {
     const isSelected = state.selectedPacks.includes(key);
     const card = document.createElement('button');
     card.className = `cat-card rounded-xl px-4 py-3 flex items-center gap-3 text-left w-full ${isSelected ? 'selected' : ''}`;
-    card.dataset.key = key;
-    const wordCount = pack.words[state.lang].length;
+    const wordCount = pack.words.length;
     card.innerHTML = `
       <div class="text-2xl">${pack.icon}</div>
       <div class="flex-1">
@@ -508,9 +505,8 @@ function buildSetupScreen() {
     card.addEventListener('click', () => {
       const idx = state.selectedPacks.indexOf(key);
       if (idx >= 0) {
-        // prevent deselecting the last remaining pack
         if (state.selectedPacks.length === 1) {
-          toast(t('لازم فئة واحدة على الأقل', 'At least one pack is required'));
+          toast(t('لازم فئة واحدة على الأقل', 'At least one pack required'));
           return;
         }
         state.selectedPacks.splice(idx, 1);
@@ -530,7 +526,6 @@ function buildSetupScreen() {
   renderTeamNameInputs();
 }
 
-// Timer pills
 document.querySelectorAll('.timer-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.timer-btn').forEach((b) => b.classList.remove('selected'));
@@ -539,7 +534,6 @@ document.querySelectorAll('.timer-btn').forEach((btn) => {
   });
 });
 
-// Team count stepper
 $('teamMinus').addEventListener('click', () => {
   state.teamCount = Math.max(2, state.teamCount - 1);
   $('teamCountDisplay').textContent = state.teamCount;
@@ -568,6 +562,10 @@ function renderTeamNameInputs() {
 
 $('startGameBtn').addEventListener('click', () => {
   ensureAudio();
+  if (!dataLoaded) {
+    toast(t('برجاء الانتظار حتى يتم تحميل البيانات', 'Please wait for data to load'));
+    return;
+  }
   if (state.selectedPacks.length === 0) {
     toast(t('اختار فئة واحدة على الأقل', 'Select at least one pack'));
     return;
@@ -601,32 +599,20 @@ function shuffle(arr) {
   return arr;
 }
 
-// Builds a shuffled queue of {word, packKey} pulled purely randomly across
-// every currently-selected pack, so words from different packs interleave
-// unpredictably rather than draining one pack before the next.
 function buildMergedWordPool() {
   const pool = [];
   state.selectedPacks.forEach((key) => {
     const pack = PACKS[key];
-    pack.words[state.lang].forEach((word) => {
-      pool.push({ word, packKey: key, icon: pack.icon });
-    });
+    if (pack.words) {
+      pack.words.forEach((word) => {
+        pool.push({ word, packKey: key, icon: pack.icon });
+      });
+    }
   });
   return shuffle(pool);
 }
 
-function nextWord() {
-  if (state.wordQueue.length === 0) {
-    state.wordQueue = buildMergedWordPool();
-  }
-  return state.wordQueue.pop();
-}
-
-/* =========================================================
-   SCREEN 3 — GAME
-   ========================================================= */
 function buildGameScreen() {
-  // Label on top
   const packLabels = state.selectedPacks.map((k) => PACKS[k].icon).join(' ');
   $('catNameTag').textContent = packLabels;
   $('targetScoreTag').textContent = state.targetScore;
@@ -665,7 +651,9 @@ $('revealBtn').addEventListener('click', () => {
   $('turnIntro').classList.add('hidden');
   $('roundActive').classList.remove('hidden');$('roundActive').classList.add('flex');
 
-  state.lastWord = nextWord();
+  if (state.wordQueue.length === 0) state.wordQueue = buildMergedWordPool();
+  state.lastWord = state.wordQueue.pop();
+  
   $('wordText').textContent = state.lastWord.word;
   const pack = PACKS[state.lastWord.packKey];
   $('wordTag').textContent = `${pack.icon} ${pack.name[state.lang]}`;
@@ -678,9 +666,7 @@ $('revealBtn').addEventListener('click', () => {
     state.timeLeft--;
     updateTimerUI();
 
-    if (state.timeLeft <= 5 && state.timeLeft > 0) {
-      tickSound();
-    }
+    if (state.timeLeft <= 5 && state.timeLeft > 0) tickSound();
 
     if (state.timeLeft <= 0) {
       clearInterval(state.timerId);
@@ -699,7 +685,6 @@ function updateTimerUI() {
   ring.setAttribute('stroke', state.timeLeft <= 10 ? '#EF4444' : '#8B5CF6');
 }
 
-// Single Correct button -> adds +1 point and immediately ends the round
 $('correctBtn').addEventListener('click', () => {
   if (!state.roundActive) return;
   clearInterval(state.timerId);
@@ -711,19 +696,16 @@ $('correctBtn').addEventListener('click', () => {
 });
 
 function checkDeuceAndWinner() {
-  // Check Deuce rule: if ALL teams reach targetScore - 1 (e.g. 4-4 when target is 5)
-  // bump targetScore to 6
   if (!state.deuceTriggered) {
     const allAtDeuce = state.teams.length >= 2 && state.teams.every((t) => t.score === state.targetScore - 1);
     if (allAtDeuce) {
       state.targetScore += 1;
       state.deuceTriggered = true;
       $('targetScoreTag').textContent = state.targetScore;
-      toast(t('🔥 تعادل! الهدف أصبح 6 نقاط', '🔥 Deuce! Target is now 6 points'));
+      toast(t('🔥 تعادل! الهدف أصبح 6 نقاط', '🔥 Deuce! Target is 6 points'));
     }
   }
 
-  // Check winner: any team >= targetScore
   const winner = state.teams.find((t) => t.score >= state.targetScore);
   if (winner) {
     state.gameOver = true;
@@ -733,7 +715,6 @@ function checkDeuceAndWinner() {
 
 function endRound(outcome) {
   state.roundActive = false;
-  state.lastOutcome = outcome;
   checkDeuceAndWinner();
 
   $('roundActive').classList.add('hidden');$('roundActive').classList.remove('flex');
@@ -772,9 +753,6 @@ $('endGameBtn').addEventListener('click', () => {
   showFinalBoard();
 });
 
-/* =========================================================
-   FINAL SCOREBOARD
-   ========================================================= */
 function showFinalBoard() {
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
   const list = $('finalScoreList');
@@ -785,7 +763,7 @@ function showFinalBoard() {
     const item = document.createElement('div');
     item.className = `input-glass rounded-xl px-4 py-3 flex items-center justify-between ${isWinner ? 'border-purple-400 bg-purple-500/10' : ''}`;
     item.innerHTML = `
-      <div class="flex items-center gap-3">
+      <div class="file-name flex items-center gap-3">
         <span class="text-xl">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '👏'}</span>
         <span class="font-bold text-base ${state.lang === 'ar' ? 'arabic' : ''}">${t.name}</span>
       </div>
