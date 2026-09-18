@@ -18,7 +18,6 @@
   }
   .arabic { font-family: 'Cairo', sans-serif; }
   .screen { height: 100dvh; width: 100%; }
-
   .home-bg {
     background:
       radial-gradient(ellipse 60% 40% at 50% 0%, rgba(236,72,153,0.16), transparent 60%),
@@ -34,7 +33,6 @@
   }
   .subtitle-glow { color: #B794F4; text-shadow: 0 0 10px rgba(167,139,250,0.6); }
   .glow-text { color: #C4B5FD; text-shadow: 0 0 8px #8B5CF6, 0 0 24px #8B5CF6, 0 0 48px #6D28D9; }
-
   .home-card {
     background: rgba(255,255,255,0.035);
     border: 1px solid rgba(255,255,255,0.08);
@@ -56,7 +54,6 @@
   .btn-ghost:active { transform: scale(0.96); }
   .btn-correct { background: linear-gradient(135deg, #22C55E, #15803D); box-shadow: 0 0 20px rgba(34,197,94,0.45); }
   .btn-correct:active { transform: scale(0.96); }
-
   .input-glass {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.10);
@@ -68,7 +65,6 @@
     box-shadow: 0 0 0 3px rgba(139,92,246,0.15), 0 0 16px rgba(139,92,246,0.25);
   }
   .input-glass::placeholder { color: #52525B; }
-
   .cat-card {
     background: rgba(255,255,255,0.035);
     border: 1.5px solid rgba(255,255,255,0.10);
@@ -95,7 +91,6 @@
     border-color: transparent;
     box-shadow: 0 0 10px rgba(236,72,153,0.5);
   }
-
   .opt-pill {
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.12);
@@ -106,16 +101,13 @@
     background: linear-gradient(90deg, rgba(244,63,94,0.25), rgba(139,92,246,0.25));
     box-shadow: 0 0 12px rgba(236,72,153,0.35);
   }
-
   .timer-ring { transition: stroke-dashoffset 1s linear, stroke .3s ease; }
   .word-reveal { animation: popin .25s ease; }
   @keyframes popin { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
   #teamStrip::-webkit-scrollbar { display: none; }
   #teamStrip { scrollbar-width: none; }
   #categoryGrid::-webkit-scrollbar { display: none; }
   #categoryGrid { scrollbar-width: none; }
-
   .toast { animation: fadein .2s ease, fadeout .3s ease 2.4s forwards; }
   @keyframes fadein { from { opacity:0; transform: translate(-50%, 10px);} to { opacity:1; transform: translate(-50%,0);} }
   @keyframes fadeout { to { opacity: 0; } }
@@ -133,7 +125,6 @@
     <p class="text-2xl font-black subtitle-glow mt-1 tracking-widest">ACT IT OUT</p>
     <p class="text-zinc-500 text-xs mt-3 tracking-wide">لعبة تمثيل جماعية من موبايل واحد فقط</p>
   </div>
-
   <div class="home-card rounded-2xl p-5 w-full max-w-sm space-y-3">
     <button data-lang="ar" class="lang-btn btn-hero w-full rounded-xl py-4 text-lg font-black arabic">العربية</button>
     <button data-lang="en" class="lang-btn btn-join w-full rounded-xl py-4 text-lg font-black tracking-wide">English</button>
@@ -149,7 +140,6 @@
     </div>
     <button id="howToPlayBtn" class="btn-ghost rounded-full w-9 h-9 flex items-center justify-center text-lg">❓</button>
   </div>
-
   <div class="flex-1 overflow-y-auto px-4 pb-3 space-y-4">
     <div>
       <div class="flex items-center justify-between mb-2">
@@ -158,7 +148,6 @@
       </div>
       <div id="categoryGrid" class="grid grid-cols-1 gap-2"></div>
     </div>
-
     <div>
       <div id="labelTimer" class="text-[11px] tracking-widest text-zinc-400 mb-2 arabic">مدة الوقت</div>
       <div class="grid grid-cols-3 gap-2">
@@ -167,7 +156,6 @@
         <button data-timer="90" class="timer-btn opt-pill rounded-xl py-2.5 font-black">90s</button>
       </div>
     </div>
-
     <div>
       <div id="labelTeams" class="text-[11px] tracking-widest text-zinc-400 mb-2 arabic">عدد الفرق</div>
       <div class="input-glass flex items-center justify-between rounded-xl px-4 py-2.5">
@@ -176,13 +164,11 @@
         <button id="teamPlus" class="btn-ghost rounded-lg w-9 h-9 text-xl font-black flex items-center justify-center">+</button>
       </div>
     </div>
-
     <div>
       <div id="labelNames" class="text-[11px] tracking-widest text-zinc-400 mb-2 arabic">أسماء الفرق (اختياري)</div>
       <div id="teamNamesList" class="space-y-2"></div>
     </div>
   </div>
-
   <div class="shrink-0 px-4 pb-4 pt-1">
     <button id="startGameBtn" class="btn-hero w-full rounded-xl py-3.5 text-lg font-black arabic" disabled>جاري تحميل البيانات... ⏳</button>
   </div>
@@ -208,16 +194,13 @@
       <span class="opt-pill rounded-full px-2 py-0.5">🎯 <span id="targetScoreTag">5</span></span>
     </div>
   </div>
-
   <div id="teamStrip" class="flex gap-1.5 overflow-x-auto px-3 pb-2 shrink-0"></div>
-
   <div class="flex-1 flex flex-col items-center justify-center px-6 min-h-0 relative">
     <div id="turnIntro" class="text-center">
       <div id="turnTeamLabel" class="text-zinc-400 text-sm mb-1 arabic">دور فريق</div>
       <div id="currentTeamName" class="text-3xl font-black title-gradient mb-6"></div>
       <button id="revealBtn" class="btn-hero rounded-2xl px-8 py-5 text-lg font-black arabic">👆 اضغط لإظهار الكلمة</button>
     </div>
-
     <div id="roundActive" class="hidden flex-col items-center w-full">
       <div class="flex items-center justify-center gap-5 w-full max-w-xs mb-6">
         <div class="relative w-24 h-24 shrink-0">
@@ -230,13 +213,11 @@
         </div>
         <button id="correctBtn" class="btn-correct rounded-2xl py-6 flex-1 h-24 font-black text-white text-lg">✅ <span id="correctBtnText" class="arabic">صح</span> +1</button>
       </div>
-
       <div id="wordCard" class="word-reveal home-card rounded-2xl px-6 py-8 w-full max-w-xs text-center">
         <div id="wordTag" class="text-[10px] tracking-widest text-purple-300 mb-1"></div>
         <div id="wordText" class="text-2xl font-black leading-snug"></div>
       </div>
     </div>
-
     <div id="roundEnd" class="hidden flex-col items-center text-center">
       <div id="endIcon" class="text-5xl mb-3">⏰</div>
       <div id="endHeadline" class="text-xl font-black mb-1 arabic">خلص الوقت!</div>
@@ -258,11 +239,14 @@
 </div>
 
 <script>
+// ============ PACK CONFIG ============
+// NOTE: `filename` is now only used for anime/players.
+// Movies pick arabicMovies.json / englishMovies.json dynamically by language.
 const PACKS = {
   movies: {
     icon: '🎬',
     name: { ar: 'أفلام ومسلسلات', en: 'Movies & Series' },
-    filename: 'arabicMovies.json' 
+    filename: null // dynamic per language
   },
   players: {
     icon: '⚽',
@@ -283,20 +267,17 @@ async function loadAllData() {
   const filesToFetch = ['arabicMovies.json', 'englishMovies.json', 'players.json', 'anime.json'];
   const cache = {};
 
-  const loadPromises = filesToFetch.map(async (filename) => {
+  await Promise.all(filesToFetch.map(async (filename) => {
     try {
       const res = await fetch(filename);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const json = await res.json();
-      cache[filename] = json;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      cache[filename] = await res.json();
     } catch (err) {
       console.error(`Error loading ${filename}:`, err);
       cache[filename] = [];
     }
-  });
+  }));
 
-  await Promise.all(loadPromises);
-  
   window._rawFiles = cache;
   dataLoaded = true;
   const startBtn = $('startGameBtn');
@@ -329,7 +310,7 @@ const RING_CIRC = 276.5;
 function toast(text) {
   const host = $('toastHost');
   const el = document.createElement('div');
-  el.className = 'toast glass rounded-full px-4 py-2 text-sm mb-2 arabic';
+  el.className = 'toast home-card rounded-full px-4 py-2 text-sm mb-2 arabic';
   el.style.left = '50%';
   el.textContent = text;
   host.appendChild(el);
@@ -338,9 +319,7 @@ function toast(text) {
 
 let audioCtx = null;
 function ensureAudio() {
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === 'suspended') audioCtx.resume();
 }
 function beep(freq, duration, type = 'sine', gainVal = 0.18) {
@@ -358,15 +337,13 @@ function beep(freq, duration, type = 'sine', gainVal = 0.18) {
   osc.stop(now + duration);
 }
 function tickSound() { beep(880, 0.08, 'square', 0.12); }
-function buzzSound() {
-  beep(160, 0.5, 'sawtooth', 0.22);
-  setTimeout(() => beep(120, 0.6, 'sawtooth', 0.22), 150);
-}
+function buzzSound() { beep(160, 0.5, 'sawtooth', 0.22); setTimeout(() => beep(120, 0.6, 'sawtooth', 0.22), 150); }
 function correctSound() { beep(1046, 0.12, 'sine', 0.16); setTimeout(() => beep(1318, 0.14, 'sine', 0.16), 90); }
 
 function showScreen(id) {
   ['screen-lang', 'screen-setup', 'screen-game'].forEach((s) => {
-    $(s).classList.toggle('hidden', s !== id);$(s).classList.toggle('flex', s === id);
+    $(s).classList.toggle('hidden', s !== id);
+    $(s).classList.toggle('flex', s === id);
   });
 }
 
@@ -376,9 +353,7 @@ document.querySelectorAll('.lang-btn').forEach((btn) => {
     state.lang = btn.dataset.lang;
     buildSetupScreen();
     showScreen('screen-setup');
-    if (!dataLoaded) {
-      loadAllData();
-    }
+    if (!dataLoaded) loadAllData();
   });
 });
 
@@ -418,17 +393,21 @@ $('howToPlayBtn').addEventListener('click', () => {
   $('howToTitle').textContent = dict.title;
   $('howToBody').innerHTML = dict.lines.map((l) => `<div>${l}</div>`).join('');
   $('closeHowToBtn').textContent = t('تمام، فهمت', 'Got it');
-  $('howToModal').classList.remove('hidden');$('howToModal').classList.add('flex');
+  $('howToModal').classList.remove('hidden');
+  $('howToModal').classList.add('flex');
 });
 $('closeHowToBtn').addEventListener('click', () => {
-  $('howToModal').classList.add('hidden');$('howToModal').classList.remove('flex');
+  $('howToModal').classList.add('hidden');
+  $('howToModal').classList.remove('flex');
 });
 
 function t(ar, en) { return state.lang === 'ar' ? ar : en; }
 
 function updateCategoryHint() {
   const n = state.selectedPacks.length;
-  $('categoryHint').textContent = n > 0 ? `${n} ${t('فئة مختارة', 'packs selected')}` : t('اختار فئة واحدة على الأقل', 'Select at least one');
+  $('categoryHint').textContent = n > 0
+    ? `${n} ${t('فئة مختارة', 'packs selected')}`
+    : t('اختار فئة واحدة على الأقل', 'Select at least one');
 }
 
 function buildSetupScreen() {
@@ -437,13 +416,12 @@ function buildSetupScreen() {
   $('labelTimer').textContent = t('مدة الوقت', 'TIMER');
   $('labelTeams').textContent = t('عدد الفرق', 'TEAMS');
   $('labelNames').textContent = t('أسماء الفرق (اختياري)', 'TEAM NAMES');
-  
+
   if (dataLoaded) {
     $('startGameBtn').innerHTML = t('ابدأ اللعب 🎬', '🎬 START GAME');
   } else {
     $('startGameBtn').innerHTML = t('جاري تحميل البيانات... ⏳', 'Loading Data... ⏳');
   }
-  
   document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
 
   const grid = $('categoryGrid');
@@ -455,12 +433,10 @@ function buildSetupScreen() {
     const isSelected = state.selectedPacks.includes(key);
     const card = document.createElement('button');
     card.className = `cat-card rounded-xl px-4 py-3 flex items-center gap-3 text-left w-full ${isSelected ? 'selected' : ''}`;
-    
     card.innerHTML = `
       <div class="text-2xl">${pack.icon}</div>
       <div class="flex-1">
         <div class="font-bold text-sm ${state.lang === 'ar' ? 'arabic' : ''}">${pack.name[state.lang]}</div>
-        <div class="text-[10px] text-zinc-500">+1000 ${t('كلمة', 'words')}</div>
       </div>
       <div class="cat-check">${isSelected ? '✓' : ''}</div>
     `;
@@ -561,98 +537,82 @@ function shuffle(arr) {
   return arr;
 }
 
-function extractWordsFromNode(node, list = []) {
-  if (!node) return list;
-  if (typeof node === 'string') {
-    const trimmed = node.trim();
-    if (trimmed && !/^\d+$/.test(trimmed)) list.push(trimmed);
-  } else if (Array.isArray(node)) {
-    node.forEach(item => extractWordsFromNode(item, list));
-  } else if (typeof node === 'object') {
-    for (const key in node) {
-      extractWordsFromNode(node[key], list);
-    }
-  }
-  return list;
-}
-
+/**
+ * Build a clean, language-aware word pool from the selected packs.
+ * For anime & players we pick the `ar` or `en` field based on state.lang.
+ * For movies we pick the correct JSON file + the `name` field.
+ * No more extraction of stray numeric IDs or double-language duplicates.
+ */
 function buildMergedWordPool() {
   const pool = [];
   const cache = window._rawFiles || {};
-  
+
   state.selectedPacks.forEach((key) => {
     let rawData = [];
+
     if (key === 'movies') {
       const filename = state.lang === 'ar' ? 'arabicMovies.json' : 'englishMovies.json';
-      rawData = cache[filename];
+      rawData = cache[filename] || [];
     } else {
-      rawData = cache[PACKS[key].filename];
+      rawData = cache[PACKS[key].filename] || [];
     }
 
-    let extracted = [];
-    if (key === 'movies') {
-      // للأفلام، قد تكون الهيكلية تحتوي على مصفوفة كائنات أو مفاتيح لغات
-      if (Array.isArray(rawData)) {
-        rawData.forEach(item => {
-          if (typeof item === 'string') {
-            const tr = item.trim();
-            if (tr) extracted.push(tr);
-          } else if (typeof item === 'object' && item !== null) {
-            // البحث عن النص داخل كائن الفيلم بناءً على اللغة الحالية
-            const targetVal = state.lang === 'ar' ? (item.ar || item.arabic || item.title_ar) : (item.en || item.english || item.title_en || item.title);
-            if (typeof targetVal === 'string' && targetVal.trim()) {
-              extracted.push(targetVal.trim());
-            } else {
-              // مسح شامل لو مفيش مفتاح صريح
-              extractWordsFromNode(item, extracted);
-            }
-          }
-        });
+    if (!Array.isArray(rawData)) return;
+
+    rawData.forEach((item) => {
+      if (!item || typeof item !== 'object') return;
+
+      let text;
+      if (key === 'movies') {
+        // Both arabicMovies.json and englishMovies.json use { name: "..." }
+        text = item.name;
       } else {
-        extractWordsFromNode(rawData, extracted);
+        // anime.json and players.json use { ar: "...", en: "..." }
+        text = state.lang === 'ar' ? item.ar : item.en;
       }
-    } else {
-      // للاعيبة والأنمي، جلب كل النصوص المتاحة بشكل كامل ونظيف
-      extractWordsFromNode(rawData, extracted);
-    }
 
-    // تنقية وتثبيت الكلمات الفريدة
-    extracted = [...new Set(extracted.map(w => w.trim()).filter(w => w.length > 0 && !/^\d+$/.test(w)))];
-
-    extracted.forEach((textVal) => {
-      pool.push({ word: textVal, packKey: key, icon: PACKS[key].icon });
+      if (typeof text === 'string' && text.trim().length > 0) {
+        pool.push({ word: text.trim(), packKey: key, icon: PACKS[key].icon });
+      }
     });
   });
 
-  return shuffle(pool);
+  // De-duplicate & shuffle
+  const seen = new Set();
+  const unique = [];
+  pool.forEach((entry) => {
+    const k = entry.word.toLowerCase();
+    if (!seen.has(k)) { seen.add(k); unique.push(entry); }
+  });
+
+  return shuffle(unique);
 }
 
 function buildGameScreen() {
   const packLabels = state.selectedPacks.map((k) => PACKS[k].icon).join(' ');
   $('catNameTag').textContent = packLabels;
   $('targetScoreTag').textContent = state.targetScore;
-  
-  // تحديث النصوص الثابتة بناءً على اللغة المختارة
+
   document.querySelectorAll('.endTxt').forEach(el => el.textContent = t('إنهاء', 'End'));
   document.querySelectorAll('.appTitleSpan').forEach(el => el.textContent = t('التمثيل', 'Act It Out'));
   $('turnTeamLabel').textContent = t('دور فريق', "Team's Turn");
   $('teamSubLabel').textContent = t('فريق', 'Team');
   $('correctBtnText').textContent = t('صح', 'Correct');
   $('finalTitle').textContent = t('النتيجة النهائية', 'Final Scoreboard');
-  
+
   renderTeamStrip();
 }
 
 function renderTeamStrip() {
   const strip = $('teamStrip');
   strip.innerHTML = '';
-  state.teams.forEach((t, i) => {
+  state.teams.forEach((team, i) => {
     const isCurrent = i === state.currentTeamIndex;
     const item = document.createElement('div');
     item.className = `opt-pill rounded-xl px-3 py-1.5 shrink-0 flex items-center gap-2 ${isCurrent ? 'selected font-bold' : 'opacity-70'}`;
     item.innerHTML = `
-      <span class="text-xs ${state.lang === 'ar' ? 'arabic' : ''}">${t.name}</span>
-      <span class="text-xs font-black text-purple-300 bg-white/10 px-1.5 py-0.5 rounded-md">${t.score}</span>
+      <span class="text-xs ${state.lang === 'ar' ? 'arabic' : ''}">${team.name}</span>
+      <span class="text-xs font-black text-purple-300 bg-white/10 px-1.5 py-0.5 rounded-md">${team.score}</span>
     `;
     strip.appendChild(item);
   });
@@ -664,7 +624,8 @@ function startTurn() {
   renderTeamStrip();
 
   $('turnIntro').classList.remove('hidden');
-  $('roundActive').classList.add('hidden');$('roundEnd').classList.add('hidden');
+  $('roundActive').classList.add('hidden');
+  $('roundEnd').classList.add('hidden');
 
   const cur = state.teams[state.currentTeamIndex];
   $('currentTeamName').textContent = cur.name;
@@ -674,12 +635,15 @@ function startTurn() {
 $('revealBtn').addEventListener('click', () => {
   ensureAudio();
   $('turnIntro').classList.add('hidden');
-  $('roundActive').classList.remove('hidden');$('roundActive').classList.add('flex');
+  $('roundActive').classList.remove('hidden');
+  $('roundActive').classList.add('flex');
 
   if (state.wordQueue.length === 0) state.wordQueue = buildMergedWordPool();
   state.lastWord = state.wordQueue.pop();
-  
-  $('wordText').textContent = state.lastWord ? state.lastWord.word : t('لا توجد كلمات', 'No words available');
+
+  $('wordText').textContent = state.lastWord
+    ? state.lastWord.word
+    : t('لا توجد كلمات', 'No words available');
   const pack = PACKS[state.lastWord ? state.lastWord.packKey : state.selectedPacks[0]];
   $('wordTag').textContent = `${pack.icon} ${pack.name[state.lang]}`;
 
@@ -690,9 +654,7 @@ $('revealBtn').addEventListener('click', () => {
   state.timerId = setInterval(() => {
     state.timeLeft--;
     updateTimerUI();
-
     if (state.timeLeft <= 5 && state.timeLeft > 0) tickSound();
-
     if (state.timeLeft <= 0) {
       clearInterval(state.timerId);
       buzzSound();
@@ -714,7 +676,6 @@ $('correctBtn').addEventListener('click', () => {
   if (!state.roundActive) return;
   clearInterval(state.timerId);
   correctSound();
-
   const cur = state.teams[state.currentTeamIndex];
   cur.score += 1;
   endRound('correct');
@@ -722,7 +683,7 @@ $('correctBtn').addEventListener('click', () => {
 
 function checkDeuceAndWinner() {
   if (!state.deuceTriggered) {
-    const allAtDeuce = state.teams.length >= 2 && state.teams.every((t) => t.score === state.targetScore - 1);
+    const allAtDeuce = state.teams.length >= 2 && state.teams.every((team) => team.score === state.targetScore - 1);
     if (allAtDeuce) {
       state.targetScore += 1;
       state.deuceTriggered = true;
@@ -730,8 +691,7 @@ function checkDeuceAndWinner() {
       toast(t('🔥 تعادل! الهدف أصبح 6 نقاط', '🔥 Deuce! Target is 6 points'));
     }
   }
-
-  const winner = state.teams.find((t) => t.score >= state.targetScore);
+  const winner = state.teams.find((team) => team.score >= state.targetScore);
   if (winner) {
     state.gameOver = true;
     state.winner = winner;
@@ -742,8 +702,10 @@ function endRound(outcome) {
   state.roundActive = false;
   checkDeuceAndWinner();
 
-  $('roundActive').classList.add('hidden');$('roundActive').classList.remove('flex');
-  $('roundEnd').classList.remove('hidden');$('roundEnd').classList.add('flex');
+  $('roundActive').classList.add('hidden');
+  $('roundActive').classList.remove('flex');
+  $('roundEnd').classList.remove('hidden');
+  $('roundEnd').classList.add('flex');
 
   const cur = state.teams[state.currentTeamIndex];
   $('endTeamName').textContent = cur.name;
@@ -751,24 +713,22 @@ function endRound(outcome) {
   if (outcome === 'correct') {
     $('endIcon').textContent = '🎉';
     $('endHeadline').textContent = t('إجابة صحيحة!', 'Correct Answer!');
-    $('endRoundScore').textContent = '+1';$('endRoundScore').className = 'text-4xl font-black text-green-400 mb-6';
+    $('endRoundScore').textContent = '+1';
+    $('endRoundScore').className = 'text-4xl font-black text-green-400 mb-6';
   } else {
-    $('endIcon').textContent = '⏰';$('endHeadline').textContent = t('خلص الوقت!', "Time's Up!");
-    $('endRoundScore').textContent = '+0';$('endRoundScore').className = 'text-4xl font-black text-zinc-500 mb-6';
+    $('endIcon').textContent = '⏰';
+    $('endHeadline').textContent = t('خلص الوقت!', "Time's Up!");
+    $('endRoundScore').textContent = '+0';
+    $('endRoundScore').className = 'text-4xl font-black text-zinc-500 mb-6';
   }
 
-  if (state.gameOver) {
-    $('nextTeamBtn').textContent = t('عرض النتيجة 🏆', 'View Final Results 🏆');
-  } else {
-    $('nextTeamBtn').textContent = t('التالي ⏩', 'Next Turn ⏩');
-  }
+  $('nextTeamBtn').textContent = state.gameOver
+    ? t('عرض النتيجة 🏆', 'View Final Results 🏆')
+    : t('التالي ⏩', 'Next Turn ⏩');
 }
 
 $('nextTeamBtn').addEventListener('click', () => {
-  if (state.gameOver) {
-    showFinalBoard();
-    return;
-  }
+  if (state.gameOver) { showFinalBoard(); return; }
   state.currentTeamIndex = (state.currentTeamIndex + 1) % state.teams.length;
   startTurn();
 });
@@ -782,27 +742,27 @@ function showFinalBoard() {
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
   const list = $('finalScoreList');
   list.innerHTML = '';
-
-  sorted.forEach((t, i) => {
-    const isWinner = i === 0 && t.score > 0;
+  sorted.forEach((team, i) => {
+    const isWinner = i === 0 && team.score > 0;
     const item = document.createElement('div');
     item.className = `input-glass rounded-xl px-4 py-3 flex items-center justify-between ${isWinner ? 'border-purple-400 bg-purple-500/10' : ''}`;
     item.innerHTML = `
       <div class="flex items-center gap-3">
         <span class="text-xl">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '👏'}</span>
-        <span class="font-bold text-base ${state.lang === 'ar' ? 'arabic' : ''}">${t.name}</span>
+        <span class="font-bold text-base ${state.lang === 'ar' ? 'arabic' : ''}">${team.name}</span>
       </div>
-      <span class="text-xl font-black text-purple-300">${t.score}</span>
+      <span class="text-xl font-black text-purple-300">${team.score}</span>
     `;
     list.appendChild(item);
   });
-
   $('playAgainBtn').textContent = t('لعبة جديدة 🔄', 'Play Again 🔄');
-  $('finalModal').classList.remove('hidden');$('finalModal').classList.add('flex');
+  $('finalModal').classList.remove('hidden');
+  $('finalModal').classList.add('flex');
 }
 
 $('playAgainBtn').addEventListener('click', () => {
-  $('finalModal').classList.add('hidden');$('finalModal').classList.remove('flex');
+  $('finalModal').classList.add('hidden');
+  $('finalModal').classList.remove('flex');
   showScreen('screen-setup');
 });
 </script>
