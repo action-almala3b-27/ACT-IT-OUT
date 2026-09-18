@@ -44,7 +44,7 @@
     transition: transform .12s ease, box-shadow .12s ease;
   }
   .btn-hero:active { transform: scale(0.97); }
-  .btn-hero:disabled { opacity: 0.35; box-shadow: none; }
+  .btn-hero:disabled { opacity: 0.45; box-shadow: none; }
   .btn-ghost {
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
     transition: transform .12s ease, background .12s ease;
@@ -58,7 +58,7 @@
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     transition: border-color .15s ease, box-shadow .15s ease;
   }
-  .input-glass:focus, .input-glass:focus-within {
+  .input-glass:focus-within {
     outline: none; border-color: rgba(196,132,252,0.6);
     box-shadow: 0 0 0 3px rgba(139,92,246,0.15), 0 0 16px rgba(139,92,246,0.25);
   }
@@ -83,6 +83,7 @@
     flex-shrink: 0;
     transition: all .15s ease;
     font-size: 13px; font-weight: 900;
+    color: white;
   }
   .cat-card.selected .cat-check {
     background: linear-gradient(135deg, #EC4899, #8B5CF6);
@@ -93,11 +94,13 @@
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.12);
     transition: all .15s ease;
+    color: #E4E4E7;
   }
   .opt-pill.selected {
     border-color: #EC4899;
     background: linear-gradient(90deg, rgba(244,63,94,0.25), rgba(139,92,246,0.25));
     box-shadow: 0 0 12px rgba(236,72,153,0.35);
+    color: #fff;
   }
   .timer-ring { transition: stroke-dashoffset 1s linear, stroke .3s ease; }
   .word-reveal { animation: popin .25s ease; }
@@ -115,23 +118,27 @@
 
 <div id="toastHost" class="fixed top-3 left-1/2 z-50 pointer-events-none"></div>
 
-<!-- ============ SCREEN 1: SETUP ============ -->
+<!-- ============ SCREEN: SETUP ============ -->
 <div id="screen-setup" class="screen home-bg flex flex-col overflow-hidden">
+
+  <!-- Header -->
   <div class="flex items-center justify-between px-4 py-3 shrink-0">
     <div class="w-9"></div>
-    <div class="text-center">
-      <div class="text-lg font-black glow-text tracking-widest">🎭 التمثيل</div>
-    </div>
+    <div class="text-lg font-black glow-text tracking-widest">🎭 التمثيل</div>
     <button id="howToPlayBtn" class="btn-ghost rounded-full w-9 h-9 flex items-center justify-center text-lg">❓</button>
   </div>
 
+  <!-- Scrollable content -->
   <div class="flex-1 overflow-y-auto px-4 pb-3 space-y-4">
+
+    <!-- Hero card -->
     <div class="home-card rounded-2xl p-4 text-center">
       <div class="hero-icon text-4xl mb-1">🎭</div>
       <h1 class="text-2xl font-black title-gradient leading-tight">التمثيل</h1>
       <p class="text-zinc-500 text-[11px] mt-1">لعبة تمثيل جماعية من موبايل واحد فقط</p>
     </div>
 
+    <!-- Categories -->
     <div>
       <div class="flex items-center justify-between mb-2">
         <div class="text-[11px] tracking-widest text-zinc-400">اختر فئة أو أكثر</div>
@@ -140,6 +147,7 @@
       <div id="categoryGrid" class="grid grid-cols-1 gap-2"></div>
     </div>
 
+    <!-- Timer -->
     <div>
       <div class="text-[11px] tracking-widest text-zinc-400 mb-2">مدة الوقت</div>
       <div class="grid grid-cols-3 gap-2">
@@ -149,6 +157,7 @@
       </div>
     </div>
 
+    <!-- Teams count -->
     <div>
       <div class="text-[11px] tracking-widest text-zinc-400 mb-2">عدد الفرق</div>
       <div class="input-glass flex items-center justify-between rounded-xl px-4 py-2.5">
@@ -158,12 +167,15 @@
       </div>
     </div>
 
+    <!-- Team names -->
     <div>
       <div class="text-[11px] tracking-widest text-zinc-400 mb-2">أسماء الفرق (اختياري)</div>
       <div id="teamNamesList" class="space-y-2"></div>
     </div>
+
   </div>
 
+  <!-- Start button -->
   <div class="shrink-0 px-4 pb-4 pt-1">
     <button id="startGameBtn" class="btn-hero w-full rounded-xl py-3.5 text-lg font-black" disabled>جاري تحميل البيانات... ⏳</button>
   </div>
@@ -179,8 +191,9 @@
   </div>
 </div>
 
-<!-- ============ SCREEN 3: GAME ============ -->
+<!-- ============ SCREEN: GAME ============ -->
 <div id="screen-game" class="screen hidden flex-col home-bg">
+
   <div class="flex items-center justify-between px-4 py-2 shrink-0">
     <button id="endGameBtn" class="btn-ghost rounded-full px-3 py-1.5 text-[11px] font-bold">🏁 إنهاء</button>
     <div class="text-sm font-black glow-text tracking-widest">🎭 التمثيل</div>
@@ -259,31 +272,6 @@ const PACKS = {
 };
 const PACK_ORDER = ['movies', 'players', 'anime'];
 
-let dataLoaded = false;
-
-async function loadAllData() {
-  const filesToFetch = ['movies.json', 'players.json', 'anime.json'];
-  const cache = {};
-
-  await Promise.all(filesToFetch.map(async (filename) => {
-    try {
-      const res = await fetch(filename);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      cache[filename] = await res.json();
-    } catch (err) {
-      console.error(`خطأ في تحميل ${filename}:`, err);
-      cache[filename] = [];
-    }
-  }));
-
-  window._rawFiles = cache;
-  dataLoaded = true;
-  const startBtn = $('startGameBtn');
-  startBtn.disabled = false;
-  startBtn.textContent = 'ابدأ اللعب 🎬';
-  buildSetupScreen();
-}
-
 const state = {
   selectedPacks: ['movies'],
   timerDuration: 60,
@@ -301,9 +289,11 @@ const state = {
   winner: null,
 };
 
+let dataLoaded = false;
 const $ = (id) => document.getElementById(id);
 const RING_CIRC = 276.5;
 
+// ============ أدوات مساعدة ============
 function toast(text) {
   const host = $('toastHost');
   const el = document.createElement('div');
@@ -314,6 +304,15 @@ function toast(text) {
   setTimeout(() => el.remove(), 2800);
 }
 
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ============ الأصوات ============
 let audioCtx = null;
 function ensureAudio() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -337,6 +336,7 @@ function tickSound() { beep(880, 0.08, 'square', 0.12); }
 function buzzSound() { beep(160, 0.5, 'sawtooth', 0.22); setTimeout(() => beep(120, 0.6, 'sawtooth', 0.22), 150); }
 function correctSound() { beep(1046, 0.12, 'sine', 0.16); setTimeout(() => beep(1318, 0.14, 'sine', 0.16), 90); }
 
+// ============ تبديل الشاشات ============
 function showScreen(id) {
   ['screen-setup', 'screen-game'].forEach((s) => {
     $(s).classList.toggle('hidden', s !== id);
@@ -344,27 +344,7 @@ function showScreen(id) {
   });
 }
 
-const HOW_TO_LINES = [
-  '🎯 كل فريق يأخذ دوره في تمثيل كلمة والباقي يخمّنون.',
-  '🗂️ اختر فئة أو أكثر؛ لو اخترت أكثر من فئة، الكلمات تُسحب بشكل عشوائي.',
-  '👆 اضغط "إظهار الكلمة" وابدأ التمثيل فورًا.',
-  '⏱️ كلمة واحدة فقط في كل دور، والعداد يعد تنازليًا.',
-  '✅ لو الفريق خمّن صح اضغط "صح +1" وينتهي الدور فورًا.',
-  '⏰ لو الوقت خلص من غير تخمين، الفريق يأخذ صفر وينتقل الدور.',
-  '🏆 أول فريق يصل لـ 5 نقاط يفوز.',
-  '🔥 لو الفريقان تعادلا 4-4، الهدف يزيد لـ 6 نقاط.'
-];
-
-$('howToPlayBtn').addEventListener('click', () => {
-  $('howToBody').innerHTML = HOW_TO_LINES.map((l) => `<div>${l}</div>`).join('');
-  $('howToModal').classList.remove('hidden');
-  $('howToModal').classList.add('flex');
-});
-$('closeHowToBtn').addEventListener('click', () => {
-  $('howToModal').classList.add('hidden');
-  $('howToModal').classList.remove('flex');
-});
-
+// ============ بناء شاشة الإعداد ============
 function updateCategoryHint() {
   const n = state.selectedPacks.length;
   $('categoryHint').textContent = n > 0
@@ -372,20 +352,20 @@ function updateCategoryHint() {
     : 'اختر فئة واحدة على الأقل';
 }
 
-function buildSetupScreen() {
-  const startBtn = $('startGameBtn');
-  if (dataLoaded) startBtn.textContent = 'ابدأ اللعب 🎬';
-  else startBtn.textContent = 'جاري تحميل البيانات... ⏳';
-
+function renderCategories() {
   const grid = $('categoryGrid');
   grid.innerHTML = '';
+
   if (state.selectedPacks.length === 0) state.selectedPacks = [PACK_ORDER[0]];
 
   PACK_ORDER.forEach((key) => {
     const pack = PACKS[key];
     const isSelected = state.selectedPacks.includes(key);
+
     const card = document.createElement('button');
+    card.type = 'button';
     card.className = `cat-card rounded-xl px-4 py-3 flex items-center gap-3 text-right w-full ${isSelected ? 'selected' : ''}`;
+
     card.innerHTML = `
       <div class="text-2xl">${pack.icon}</div>
       <div class="flex-1">
@@ -393,6 +373,7 @@ function buildSetupScreen() {
       </div>
       <div class="cat-check">${isSelected ? '✓' : ''}</div>
     `;
+
     card.addEventListener('click', () => {
       const idx = state.selectedPacks.indexOf(key);
       if (idx >= 0) {
@@ -410,12 +391,63 @@ function buildSetupScreen() {
       }
       updateCategoryHint();
     });
+
     grid.appendChild(card);
   });
 
   updateCategoryHint();
-  renderTeamNameInputs();
 }
+
+function renderTeamNameInputs() {
+  const list = $('teamNamesList');
+  list.innerHTML = '';
+  for (let i = 0; i < state.teamCount; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'input-glass rounded-xl px-3';
+    wrap.innerHTML = `
+      <input type="text" maxlength="14" data-idx="${i}"
+        placeholder="فريق ${i + 1}"
+        class="team-name-input w-full bg-transparent outline-none text-sm py-3 text-white placeholder-zinc-600" />
+    `;
+    list.appendChild(wrap);
+  }
+}
+
+function buildSetupScreen() {
+  renderCategories();
+  renderTeamNameInputs();
+
+  const startBtn = $('startGameBtn');
+  if (dataLoaded) {
+    startBtn.disabled = false;
+    startBtn.textContent = 'ابدأ اللعب 🎬';
+  } else {
+    startBtn.disabled = true;
+    startBtn.textContent = 'جاري تحميل البيانات... ⏳';
+  }
+}
+
+// ============ أزرار الإعداد ============
+$('howToPlayBtn').addEventListener('click', () => {
+  const lines = [
+    '🎯 كل فريق يأخذ دوره في تمثيل كلمة والباقي يخمّنون.',
+    '🗂️ اختر فئة أو أكثر؛ لو اخترت أكثر من فئة، الكلمات تُسحب بشكل عشوائي.',
+    '👆 اضغط "إظهار الكلمة" وابدأ التمثيل فورًا.',
+    '⏱️ كلمة واحدة فقط في كل دور، والعداد يعد تنازليًا.',
+    '✅ لو الفريق خمّن صح اضغط "صح +1" وينتهي الدور فورًا.',
+    '⏰ لو الوقت خلص من غير تخمين، الفريق يأخذ صفر وينتقل الدور.',
+    '🏆 أول فريق يصل لـ 5 نقاط يفوز.',
+    '🔥 لو الفريقان تعادلا 4-4، الهدف يزيد لـ 6 نقاط.'
+  ];
+  $('howToBody').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
+  $('howToModal').classList.remove('hidden');
+  $('howToModal').classList.add('flex');
+});
+
+$('closeHowToBtn').addEventListener('click', () => {
+  $('howToModal').classList.add('hidden');
+  $('howToModal').classList.remove('flex');
+});
 
 document.querySelectorAll('.timer-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -430,29 +462,40 @@ $('teamMinus').addEventListener('click', () => {
   $('teamCountDisplay').textContent = state.teamCount;
   renderTeamNameInputs();
 });
+
 $('teamPlus').addEventListener('click', () => {
   state.teamCount = Math.min(8, state.teamCount + 1);
   $('teamCountDisplay').textContent = state.teamCount;
   renderTeamNameInputs();
 });
 
-function renderTeamNameInputs() {
-  const list = $('teamNamesList');
-  list.innerHTML = '';
-  for (let i = 0; i < state.teamCount; i++) {
-    const wrap = document.createElement('div');
-    wrap.className = 'input-glass rounded-xl px-3 py-1';
-    wrap.innerHTML = `
-      <input type="text" maxlength="14" data-idx="${i}"
-        placeholder="فريق ${i + 1}"
-        class="team-name-input w-full bg-transparent outline-none text-sm py-2 text-white placeholder-zinc-600" />
-    `;
-    list.appendChild(wrap);
-  }
+// ============ تحميل البيانات ============
+async function loadAllData() {
+  const filesToFetch = ['movies.json', 'players.json', 'anime.json'];
+  const cache = {};
+
+  await Promise.all(filesToFetch.map(async (filename) => {
+    try {
+      const res = await fetch(filename);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      cache[filename] = await res.json();
+    } catch (err) {
+      console.error(`خطأ في تحميل ${filename}:`, err);
+      cache[filename] = [];
+    }
+  }));
+
+  window._rawFiles = cache;
+  dataLoaded = true;
+
+  // تحديث شاشة الإعداد بعد التحميل
+  buildSetupScreen();
 }
 
+// ============ بدء اللعبة ============
 $('startGameBtn').addEventListener('click', () => {
   ensureAudio();
+
   if (!dataLoaded) {
     toast('برجاء الانتظار حتى يتم تحميل البيانات');
     return;
@@ -477,20 +520,15 @@ $('startGameBtn').addEventListener('click', () => {
   state.gameOver = false;
   state.winner = null;
 
-  buildGameScreen();
+  $('catNameTag').textContent = state.selectedPacks.map((k) => PACKS[k].icon).join(' ');
+  $('targetScoreTag').textContent = state.targetScore;
+
+  renderTeamStrip();
   showScreen('screen-game');
   startTurn();
 });
 
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-// بناء قائمة الكلمات من الفئات المختارة
+// ============ بناء قائمة الكلمات ============
 function buildMergedWordPool() {
   const pool = [];
   const cache = window._rawFiles || {};
@@ -511,19 +549,16 @@ function buildMergedWordPool() {
   const seen = new Set();
   const unique = [];
   pool.forEach((entry) => {
-    const k = entry.word;
-    if (!seen.has(k)) { seen.add(k); unique.push(entry); }
+    if (!seen.has(entry.word)) {
+      seen.add(entry.word);
+      unique.push(entry);
+    }
   });
 
   return shuffle(unique);
 }
 
-function buildGameScreen() {
-  $('catNameTag').textContent = state.selectedPacks.map((k) => PACKS[k].icon).join(' ');
-  $('targetScoreTag').textContent = state.targetScore;
-  renderTeamStrip();
-}
-
+// ============ شاشة اللعب ============
 function renderTeamStrip() {
   const strip = $('teamStrip');
   strip.innerHTML = '';
@@ -546,7 +581,9 @@ function startTurn() {
 
   $('turnIntro').classList.remove('hidden');
   $('roundActive').classList.add('hidden');
+  $('roundActive').classList.remove('flex');
   $('roundEnd').classList.add('hidden');
+  $('roundEnd').classList.remove('flex');
 
   const cur = state.teams[state.currentTeamIndex];
   $('currentTeamName').textContent = cur.name;
@@ -583,7 +620,7 @@ $('revealBtn').addEventListener('click', () => {
 
 function updateTimerUI() {
   $('timerNum').textContent = state.timeLeft;
-  const fraction = state.timeLeft / state.timerDuration;
+  const fraction = Math.max(0, state.timeLeft) / state.timerDuration;
   const offset = RING_CIRC * (1 - fraction);
   const ring = $('timerRing');
   ring.style.strokeDashoffset = offset;
@@ -682,6 +719,13 @@ $('playAgainBtn').addEventListener('click', () => {
   $('finalModal').classList.remove('flex');
   showScreen('screen-setup');
 });
+
+// ============ التشغيل ============
+// 1) بناء الواجهة فورًا عند تحميل الصفحة (قبل وصول البيانات)
+buildSetupScreen();
+
+// 2) تحميل البيانات في الخلفية ثم تحديث الواجهة
+loadAllData();
 </script>
 </body>
 </html>
