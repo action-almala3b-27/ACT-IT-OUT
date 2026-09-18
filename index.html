@@ -291,11 +291,7 @@ async function loadAllData() {
       const res = await fetch(filename);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const json = await res.json();
-      let arr = [];
-      if (Array.isArray(json)) arr = json;
-      else if (json.words && Array.isArray(json.words)) arr = json.words;
-      else arr = Object.values(json)[0] || [];
-      cache[filename] = arr;
+      cache[filename] = json;
     } catch (err) {
       console.error(`Error loading ${filename}:`, err);
       cache[filename] = [];
@@ -568,6 +564,20 @@ function shuffle(arr) {
   return arr;
 }
 
+function extractWordsDeep(obj, list = []) {
+  if (!obj) return list;
+  if (typeof obj === 'string') {
+    if (obj.trim() && !/^\d+$/.test(obj.trim())) {
+      list.push(obj.trim());
+    }
+  } else if (Array.isArray(obj)) {
+    obj.forEach(item => extractWordsDeep(item, list));
+  } else if (typeof obj === 'object') {
+    Object.values(obj).forEach(val => extractWordsDeep(val, list));
+  }
+  return list;
+}
+
 function buildMergedWordPool() {
   const pool = [];
   const cache = window._rawFiles || {};
@@ -576,31 +586,10 @@ function buildMergedWordPool() {
     const filename = pack.filename; 
     const rawData = cache[filename];
     
-    const extractText = (item) => {
-      if (!item) return '';
-      if (typeof item === 'string') return item;
-      if (typeof item === 'object') {
-        const val = item.word || item.name || item.title || item.arabic || item.english || Object.values(item).find(v => typeof v === 'string' && !/^\d+$/.test(v));
-        return typeof val === 'string' ? val : '';
-      }
-      return '';
-    };
-
-    if (Array.isArray(rawData)) {
-      rawData.forEach((item) => {
-        const textVal = extractText(item);
-        if (textVal && !/^\d+$/.test(textVal)) {
-          pool.push({ word: textVal, packKey: key, icon: pack.icon });
-        }
-      });
-    } else if (rawData && typeof rawData === 'object') {
-      Object.values(rawData).forEach((item) => {
-        const textVal = extractText(item);
-        if (textVal && !/^\d+$/.test(textVal)) {
-          pool.push({ word: textVal, packKey: key, icon: pack.icon });
-        }
-      });
-    }
+    const extracted = extractWordsDeep(rawData);
+    extracted.forEach((textVal) => {
+      pool.push({ word: textVal, packKey: key, icon: pack.icon });
+    });
   });
   return shuffle(pool);
 }
