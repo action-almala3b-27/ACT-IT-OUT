@@ -35,12 +35,6 @@
   .subtitle-glow { color: #B794F4; text-shadow: 0 0 10px rgba(167,139,250,0.6); }
   .glow-text { color: #C4B5FD; text-shadow: 0 0 8px #8B5CF6, 0 0 24px #8B5CF6, 0 0 48px #6D28D9; }
 
-  .glass {
-    background: rgba(255,255,255,0.04);
-    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(139,92,246,0.25);
-    box-shadow: 0 0 24px rgba(139,92,246,0.08), inset 0 1px 0 rgba(255,255,255,0.05);
-  }
   .home-card {
     background: rgba(255,255,255,0.035);
     border: 1px solid rgba(255,255,255,0.08);
@@ -113,13 +107,8 @@
     box-shadow: 0 0 12px rgba(236,72,153,0.35);
   }
 
-  .timer-ring {
-    transition: stroke-dashoffset 1s linear, stroke .3s ease;
-  }
-
-  .word-reveal {
-    animation: popin .25s ease;
-  }
+  .timer-ring { transition: stroke-dashoffset 1s linear, stroke .3s ease; }
+  .word-reveal { animation: popin .25s ease; }
   @keyframes popin { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
   #teamStrip::-webkit-scrollbar { display: none; }
@@ -134,7 +123,6 @@
 </head>
 <body class="text-white">
 
-<!-- Toast -->
 <div id="toastHost" class="fixed top-3 left-1/2 z-50 pointer-events-none"></div>
 
 <!-- ============ SCREEN 1: LANGUAGE SELECT ============ -->
@@ -163,7 +151,6 @@
   </div>
 
   <div class="flex-1 overflow-y-auto px-4 pb-3 space-y-4">
-    <!-- Category (multi-select) -->
     <div>
       <div class="flex items-center justify-between mb-2">
         <div id="labelCategory" class="text-[11px] tracking-widest text-zinc-400 arabic">اختار فئة أو أكتر</div>
@@ -172,7 +159,6 @@
       <div id="categoryGrid" class="grid grid-cols-1 gap-2"></div>
     </div>
 
-    <!-- Timer -->
     <div>
       <div id="labelTimer" class="text-[11px] tracking-widest text-zinc-400 mb-2 arabic">مدة الوقت</div>
       <div class="grid grid-cols-3 gap-2">
@@ -182,7 +168,6 @@
       </div>
     </div>
 
-    <!-- Teams -->
     <div>
       <div id="labelTeams" class="text-[11px] tracking-widest text-zinc-400 mb-2 arabic">عدد الفرق</div>
       <div class="input-glass flex items-center justify-between rounded-xl px-4 py-2.5">
@@ -192,7 +177,6 @@
       </div>
     </div>
 
-    <!-- Team names -->
     <div>
       <div id="labelNames" class="text-[11px] tracking-widest text-zinc-400 mb-2 arabic">أسماء الفرق (اختياري)</div>
       <div id="teamNamesList" class="space-y-2"></div>
@@ -274,20 +258,11 @@
 </div>
 
 <script>
-/* =========================================================
-   PACK DEFINITIONS (سحب مباشر بأسماء ملفاتك)
-   ========================================================= */
 const PACKS = {
-  arabicMovies: {
+  movies: {
     icon: '🎬',
-    name: { ar: 'أفلام عربية', en: 'Arabic Movies' },
-    filename: 'arabicMovies.json',
-    words: []
-  },
-  englishMovies: {
-    icon: '🎥',
-    name: { ar: 'أفلام أجنبية', en: 'English Movies' },
-    filename: 'englishMovies.json',
+    name: { ar: 'أفلام ومسلسلات', en: 'Movies & Series' },
+    get filename() { return state.lang === 'ar' ? 'arabicMovies.json' : 'englishMovies.json'; },
     words: []
   },
   players: {
@@ -303,43 +278,43 @@ const PACKS = {
     words: []
   }
 };
-const PACK_ORDER = ['arabicMovies', 'englishMovies', 'players', 'anime'];
+const PACK_ORDER = ['movies', 'players', 'anime'];
 
 let dataLoaded = false;
 
 async function loadAllData() {
-  const loadPromises = PACK_ORDER.map(async (key) => {
+  const filesToFetch = ['arabicMovies.json', 'englishMovies.json', 'players.json', 'anime.json'];
+  const cache = {};
+
+  const loadPromises = filesToFetch.map(async (filename) => {
     try {
-      const res = await fetch(PACKS[key].filename);
+      const res = await fetch(filename);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const json = await res.json();
-      // يدعم لو الملف عبارة عن مصفوفة كلمات مباشرة
-      if (Array.isArray(json)) {
-        PACKS[key].words = json;
-      } else if (json.words && Array.isArray(json.words)) {
-        PACKS[key].words = json.words;
-      } else {
-        // لو مصفوفة داخل كีย์ تاني
-        PACKS[key].words = Object.values(json)[0] || [];
-      }
+      let arr = [];
+      if (Array.isArray(json)) arr = json;
+      else if (json.words && Array.isArray(json.words)) arr = json.words;
+      else arr = Object.values(json)[0] || [];
+      cache[filename] = arr;
     } catch (err) {
-      console.error(`Error loading pack ${key}:`, err);
+      console.error(`Error loading ${filename}:`, err);
+      cache[filename] = [];
     }
   });
 
   await Promise.all(loadPromises);
+  
+  window._rawFiles = cache;
   dataLoaded = true;
   const startBtn = $('startGameBtn');
   startBtn.disabled = false;
   startBtn.innerHTML = t('ابدأ اللعب 🎬', '🎬 START GAME');
+  buildSetupScreen();
 }
 
-/* =========================================================
-   STATE
-   ========================================================= */
 const state = {
   lang: 'ar',
-  selectedPacks: ['arabicMovies'],
+  selectedPacks: ['movies'],
   timerDuration: 60,
   teamCount: 2,
   teams: [],
@@ -368,9 +343,6 @@ function toast(text) {
   setTimeout(() => el.remove(), 2800);
 }
 
-/* =========================================================
-   AUDIO
-   ========================================================= */
 let audioCtx = null;
 function ensureAudio() {
   if (!audioCtx) {
@@ -399,9 +371,6 @@ function buzzSound() {
 }
 function correctSound() { beep(1046, 0.12, 'sine', 0.16); setTimeout(() => beep(1318, 0.14, 'sine', 0.16), 90); }
 
-/* =========================================================
-   NAVIGATION
-   ========================================================= */
 function showScreen(id) {
   ['screen-lang', 'screen-setup', 'screen-game'].forEach((s) => {
     $(s).classList.toggle('hidden', s !== id);$(s).classList.toggle('flex', s === id);
@@ -493,12 +462,12 @@ function buildSetupScreen() {
     const isSelected = state.selectedPacks.includes(key);
     const card = document.createElement('button');
     card.className = `cat-card rounded-xl px-4 py-3 flex items-center gap-3 text-left w-full ${isSelected ? 'selected' : ''}`;
-    const wordCount = pack.words.length;
+    
     card.innerHTML = `
       <div class="text-2xl">${pack.icon}</div>
       <div class="flex-1">
         <div class="font-bold text-sm ${state.lang === 'ar' ? 'arabic' : ''}">${pack.name[state.lang]}</div>
-        <div class="text-[10px] text-zinc-500">+${wordCount} ${t('كلمة', 'words')}</div>
+        <div class="text-[10px] text-zinc-500">+1000 ${t('كلمة', 'words')}</div>
       </div>
       <div class="cat-check">${isSelected ? '✓' : ''}</div>
     `;
@@ -601,13 +570,14 @@ function shuffle(arr) {
 
 function buildMergedWordPool() {
   const pool = [];
+  const cache = window._rawFiles || {};
   state.selectedPacks.forEach((key) => {
     const pack = PACKS[key];
-    if (pack.words) {
-      pack.words.forEach((word) => {
-        pool.push({ word, packKey: key, icon: pack.icon });
-      });
-    }
+    const filename = pack.filename; 
+    const words = cache[filename] || [];
+    words.forEach((word) => {
+      pool.push({ word, packKey: key, icon: pack.icon });
+    });
   });
   return shuffle(pool);
 }
