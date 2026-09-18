@@ -9,17 +9,15 @@
 <style>
   :root { color-scheme: dark; }
   html, body {
-    height: 100%;
-    height: 100dvh;
-    overflow: hidden;
+    min-height: 100%;
     background: #09090B;
     font-family: 'Cairo', sans-serif;
     -webkit-tap-highlight-color: transparent;
-    overscroll-behavior: none;
-    position: fixed;
-    inset: 0;
+    overscroll-behavior-y: none;
   }
-  .screen { height: 100dvh; width: 100%; }
+  body { color: #fff; }
+
+  .screen { min-height: 100dvh; width: 100%; }
   .home-bg {
     background:
       radial-gradient(ellipse 60% 40% at 50% 0%, rgba(236,72,153,0.16), transparent 60%),
@@ -72,7 +70,7 @@
   }
   .input-glass::placeholder { color: #52525B; }
 
-  /* ===== Compact category card (grid 3-col) ===== */
+  /* ===== Category cards — comfortable sizing ===== */
   .cat-card {
     background: rgba(255,255,255,0.035);
     border: 1.5px solid rgba(255,255,255,0.10);
@@ -82,35 +80,36 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    padding: 8px 4px;
+    gap: 6px;
+    padding: 16px 8px;
     text-align: center;
     cursor: pointer;
+    min-height: 92px;
   }
   .cat-card.selected {
     border-color: #C084FC;
-    box-shadow: 0 0 0 2px rgba(139,92,246,0.25), 0 0 14px rgba(139,92,246,0.4);
+    box-shadow: 0 0 0 2px rgba(139,92,246,0.25), 0 0 18px rgba(139,92,246,0.4);
     background: rgba(139,92,246,0.10);
   }
   .cat-card:active { transform: scale(0.97); }
-  .cat-icon { font-size: 20px; line-height: 1; }
-  .cat-name { font-size: 10px; font-weight: 800; line-height: 1.15; }
+  .cat-icon { font-size: 30px; line-height: 1; }
+  .cat-name { font-size: 13px; font-weight: 800; line-height: 1.2; }
   .cat-check {
     position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 15px; height: 15px; border-radius: 5px;
-    border: 1.2px solid rgba(255,255,255,0.25);
+    top: 6px;
+    left: 6px;
+    width: 20px; height: 20px; border-radius: 7px;
+    border: 1.5px solid rgba(255,255,255,0.25);
     background: rgba(255,255,255,0.04);
     display: flex; align-items: center; justify-content: center;
-    font-size: 9px; font-weight: 900;
+    font-size: 12px; font-weight: 900;
     transition: all .15s ease;
     color: #fff;
   }
   .cat-card.selected .cat-check {
     background: linear-gradient(135deg, #EC4899, #8B5CF6);
     border-color: transparent;
-    box-shadow: 0 0 8px rgba(236,72,153,0.5);
+    box-shadow: 0 0 10px rgba(236,72,153,0.5);
   }
 
   .opt-pill {
@@ -125,13 +124,39 @@
     box-shadow: 0 0 12px rgba(236,72,153,0.35);
     color: #fff;
   }
+
+  /* ===== Team name inputs — comfortable ===== */
+  .name-wrap {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    padding: 0 14px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .name-wrap:focus-within {
+    border-color: rgba(196,132,252,0.6);
+    box-shadow: 0 0 0 3px rgba(139,92,246,0.15), 0 0 16px rgba(139,92,246,0.25);
+  }
+  .team-name-input {
+    width: 100%;
+    background: transparent;
+    outline: none;
+    font-size: 15px;
+    padding: 12px 0;
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    text-align: center;
+    font-weight: 700;
+  }
+  .team-name-input::placeholder { color: #52525B; font-weight: 400; }
+
+  /* Timer ring transition */
   .timer-ring { transition: stroke-dashoffset 1s linear, stroke .3s ease; }
   .word-reveal { animation: popin .25s ease; }
   @keyframes popin { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   #teamStrip::-webkit-scrollbar { display: none; }
   #teamStrip { scrollbar-width: none; }
-  #categoryGrid::-webkit-scrollbar { display: none; }
-  #categoryGrid { scrollbar-width: none; }
+
   .toast { animation: fadein .2s ease, fadeout .3s ease 2.4s forwards; }
   @keyframes fadein { from { opacity:0; transform: translate(50%, 10px);} to { opacity:1; transform: translate(50%,0);} }
   @keyframes fadeout { to { opacity: 0; } }
@@ -148,59 +173,6 @@
     40%  { filter: drop-shadow(0 0 12px rgba(245,158,11,0.9)); }
     100% { filter: drop-shadow(0 0 0 rgba(245,158,11,0)); }
   }
-
-  /* ===== Setup screen — no scroll, compact ===== */
-  #screen-setup {
-    height: 100dvh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* ===== Team name inputs grid ===== */
-  #teamNamesList {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-  }
-  #teamNamesList .name-wrap {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.10);
-    border-radius: 10px;
-    padding: 0 8px;
-    transition: border-color .15s ease, box-shadow .15s ease;
-  }
-  #teamNamesList .name-wrap:focus-within {
-    border-color: rgba(196,132,252,0.6);
-    box-shadow: 0 0 0 2px rgba(139,92,246,0.15), 0 0 12px rgba(139,92,246,0.25);
-  }
-  .team-name-input {
-    width: 100%;
-    background: transparent;
-    outline: none;
-    font-size: 12px;
-    padding: 7px 0;
-    color: #fff;
-    font-family: 'Cairo', sans-serif;
-    text-align: center;
-  }
-  .team-name-input::placeholder { color: #52525B; }
-
-  /* Small screen tweak — 1 col inputs on very narrow */
-  @media (max-width: 340px) {
-    #teamNamesList { grid-template-columns: 1fr; }
-  }
-
-  /* Very short screens — hide optional label texts */
-  @media (max-height: 640px) {
-    .setup-label { display: none !important; }
-    .cat-icon { font-size: 18px; }
-    .cat-name { font-size: 9px; }
-  }
-  @media (max-height: 560px) {
-    #teamNamesList { grid-template-columns: repeat(3, 1fr); }
-    .setup-title { font-size: 15px !important; }
-  }
 </style>
 </head>
 <body class="text-white">
@@ -208,58 +180,61 @@
 <div id="toastHost" class="fixed top-3 left-1/2 z-50 pointer-events-none"></div>
 
 <!-- ============ SCREEN: SETUP ============ -->
-<div id="screen-setup" class="home-bg">
+<div id="screen-setup" class="screen home-bg flex flex-col">
 
   <!-- Header -->
-  <div class="flex items-center justify-between px-4 py-2 shrink-0">
-    <div class="w-9"></div>
-    <div class="setup-title text-lg font-black glow-text tracking-widest">🎭 التمثيل</div>
-    <button id="howToPlayBtn" class="btn-ghost rounded-full w-9 h-9 flex items-center justify-center text-lg">❓</button>
+  <div class="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
+    <div class="w-10"></div>
+    <div class="text-xl font-black glow-text tracking-widest">🎭 التمثيل</div>
+    <button id="howToPlayBtn" class="btn-ghost rounded-full w-10 h-10 flex items-center justify-center text-lg">❓</button>
   </div>
 
-  <!-- Content — no scroll, compact flex column -->
-  <div class="flex-1 min-h-0 flex flex-col gap-2.5 px-4 pb-2">
+  <!-- Content -->
+  <div class="flex-1 px-4 pb-4 flex flex-col gap-5 max-w-md w-full mx-auto">
 
     <!-- Categories -->
-    <div class="shrink-0">
-      <div class="flex items-center justify-between mb-1.5">
-        <div class="setup-label text-[10px] tracking-widest text-zinc-400">اختر فئة أو أكثر</div>
-        <div id="categoryHint" class="text-[10px] text-purple-300"></div>
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-sm font-bold text-zinc-300">اختر فئة أو أكثر</div>
+        <div id="categoryHint" class="text-xs font-bold text-purple-300"></div>
       </div>
-      <div id="categoryGrid" class="grid grid-cols-3 gap-2"></div>
+      <div id="categoryGrid" class="grid grid-cols-3 gap-3"></div>
     </div>
 
     <!-- Timer -->
-    <div class="shrink-0">
-      <div class="setup-label text-[10px] tracking-widest text-zinc-400 mb-1.5">مدة الوقت</div>
-      <div class="grid grid-cols-3 gap-2">
-        <button data-timer="30" class="timer-btn opt-pill rounded-lg py-2 text-[13px] font-black">30 ثانية</button>
-        <button data-timer="60" class="timer-btn opt-pill rounded-lg py-2 text-[13px] font-black selected">60 ثانية</button>
-        <button data-timer="90" class="timer-btn opt-pill rounded-lg py-2 text-[13px] font-black">90 ثانية</button>
+    <div>
+      <div class="text-sm font-bold text-zinc-300 mb-3">مدة الوقت</div>
+      <div class="grid grid-cols-3 gap-3">
+        <button data-timer="30" class="timer-btn opt-pill rounded-xl py-3.5 text-base font-black">30 ثانية</button>
+        <button data-timer="60" class="timer-btn opt-pill rounded-xl py-3.5 text-base font-black selected">60 ثانية</button>
+        <button data-timer="90" class="timer-btn opt-pill rounded-xl py-3.5 text-base font-black">90 ثانية</button>
       </div>
     </div>
 
     <!-- Teams counter -->
-    <div class="shrink-0">
-      <div class="setup-label text-[10px] tracking-widest text-zinc-400 mb-1.5">عدد الفرق</div>
-      <div class="input-glass flex items-center justify-between rounded-lg px-3 py-1">
-        <button id="teamMinus" class="btn-ghost rounded-md w-8 h-8 text-lg font-black flex items-center justify-center">−</button>
-        <div id="teamCountDisplay" class="text-xl font-black">2</div>
-        <button id="teamPlus" class="btn-ghost rounded-md w-8 h-8 text-lg font-black flex items-center justify-center">+</button>
+    <div>
+      <div class="text-sm font-bold text-zinc-300 mb-3">عدد الفرق</div>
+      <div class="input-glass flex items-center justify-between rounded-2xl px-4 py-3">
+        <button id="teamMinus" class="btn-ghost rounded-xl w-11 h-11 text-2xl font-black flex items-center justify-center">−</button>
+        <div id="teamCountDisplay" class="text-3xl font-black">2</div>
+        <button id="teamPlus" class="btn-ghost rounded-xl w-11 h-11 text-2xl font-black flex items-center justify-center">+</button>
       </div>
     </div>
 
-    <!-- Team names — takes remaining height, no scroll -->
-    <div class="flex-1 min-h-0 flex flex-col">
-      <div class="setup-label text-[10px] tracking-widest text-zinc-400 mb-1.5 shrink-0">أسماء الفرق (اختياري)</div>
-      <div id="teamNamesList" class="min-h-0"></div>
+    <!-- Team names -->
+    <div>
+      <div class="text-sm font-bold text-zinc-300 mb-3">أسماء الفرق (اختياري)</div>
+      <div id="teamNamesList" class="grid grid-cols-2 gap-3"></div>
     </div>
 
-  </div>
+    <!-- spacer pushes button to bottom on tall screens -->
+    <div class="flex-1 min-h-2"></div>
 
-  <!-- Start button -->
-  <div class="shrink-0 px-4 pb-3 pt-1">
-    <button id="startGameBtn" class="btn-hero w-full rounded-xl py-3 text-base font-black" disabled>جاري تحميل البيانات... ⏳</button>
+    <!-- Start button -->
+    <button id="startGameBtn" class="btn-hero w-full rounded-2xl py-4 text-lg font-black shrink-0" disabled>
+      جاري تحميل البيانات... ⏳
+    </button>
+
   </div>
 
 </div>
@@ -424,13 +399,14 @@ function showScreen(id) {
     $(s).classList.toggle('hidden', s !== id);
     $(s).classList.toggle('flex', s === id);
   });
+  window.scrollTo(0, 0);
 }
 
 // ============ بناء شاشة الإعداد ============
 function updateCategoryHint() {
   const n = state.selectedPacks.length;
   $('categoryHint').textContent = n > 0
-    ? `${n} فئة مختارة`
+    ? `${n} مختارة`
     : 'اختر فئة واحدة على الأقل';
 }
 
@@ -445,7 +421,7 @@ function renderCategories() {
 
     const card = document.createElement('button');
     card.type = 'button';
-    card.className = `cat-card rounded-lg w-full ${isSelected ? 'selected' : ''}`;
+    card.className = `cat-card rounded-2xl w-full ${isSelected ? 'selected' : ''}`;
 
     card.innerHTML = `
       <div class="cat-icon">${pack.icon}</div>
