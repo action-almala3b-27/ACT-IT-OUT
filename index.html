@@ -564,7 +564,7 @@ function shuffle(arr) {
   return arr;
 }
 
-// دالة متطورة تستخرج كل النصوص الصالحة من أي شكل JSON بدون استثناء
+// دالة متطورة تضمن استخراج جميع النصوص الصالحة من أي ملف JSON بغض النظر عن هيكله
 function extractWordsDeep(obj, list = []) {
   if (!obj) return list;
   if (typeof obj === 'string') {
@@ -577,7 +577,7 @@ function extractWordsDeep(obj, list = []) {
   } else if (typeof obj === 'object') {
     for (const key in obj) {
       const val = obj[key];
-      // لو المفتاح يعبر عن لغة محددة، نصفي حسب لغة التطبيق الحالية عشان ميتداخلش العربي مع الإنجليزي
+      // التعامل الذكي مع الفئات المقسمة للغات (مثل الأفلام)
       if (key === 'ar' || key === 'arabic') {
         if (state.lang === 'ar' && typeof val === 'string' && val.trim()) {
           list.push(val.trim());
@@ -606,7 +606,7 @@ function buildMergedWordPool() {
     
     let extracted = extractWordsDeep(rawData);
     
-    // فحص احتياطي لو الدالة مطلعتش حاجة لجلب أي نص عشوائي متاح داخل الملف
+    // فحص احتياطي عام يمر على كل الـ JSON لو ملقاش مفاتيح لغات محددة (مثل لاعيبة كرة القدم والأنمي)
     if (extracted.length === 0 && rawData) {
       JSON.stringify(rawData, (k, v) => {
         if (typeof v === 'string' && v.trim() && !/^\d+$/.test(v.trim())) {
@@ -616,7 +616,7 @@ function buildMergedWordPool() {
       });
     }
 
-    // إزالة التكرار لتنظيف القائمة
+    // تصفية إضافية لإزالة أي قيم مكررة وضمان نظافة القائمة
     extracted = [...new Set(extracted)];
 
     extracted.forEach((textVal) => {
