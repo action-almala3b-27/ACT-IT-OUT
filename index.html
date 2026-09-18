@@ -564,16 +564,34 @@ function shuffle(arr) {
   return arr;
 }
 
+// دالة متطورة تستخرج كل النصوص الصالحة من أي شكل JSON بدون استثناء
 function extractWordsDeep(obj, list = []) {
   if (!obj) return list;
   if (typeof obj === 'string') {
-    if (obj.trim() && !/^\d+$/.test(obj.trim())) {
-      list.push(obj.trim());
+    const trimmed = obj.trim();
+    if (trimmed && !/^\d+$/.test(trimmed)) {
+      list.push(trimmed);
     }
   } else if (Array.isArray(obj)) {
     obj.forEach(item => extractWordsDeep(item, list));
   } else if (typeof obj === 'object') {
-    Object.values(obj).forEach(val => extractWordsDeep(val, list));
+    for (const key in obj) {
+      const val = obj[key];
+      // لو المفتاح يعبر عن لغة محددة، نصفي حسب لغة التطبيق الحالية عشان ميتداخلش العربي مع الإنجليزي
+      if (key === 'ar' || key === 'arabic') {
+        if (state.lang === 'ar' && typeof val === 'string' && val.trim()) {
+          list.push(val.trim());
+        }
+        continue;
+      }
+      if (key === 'en' || key === 'english') {
+        if (state.lang === 'en' && typeof val === 'string' && val.trim()) {
+          list.push(val.trim());
+        }
+        continue;
+      }
+      extractWordsDeep(val, list);
+    }
   }
   return list;
 }
@@ -583,10 +601,24 @@ function buildMergedWordPool() {
   const cache = window._rawFiles || {};
   state.selectedPacks.forEach((key) => {
     const pack = PACKS[key];
-    const filename = pack.filename; 
+    const filename = typeof pack.filename === 'function' ? pack.filename : pack.filename; 
     const rawData = cache[filename];
     
-    const extracted = extractWordsDeep(rawData);
+    let extracted = extractWordsDeep(rawData);
+    
+    // فحص احتياطي لو الدالة مطلعتش حاجة لجلب أي نص عشوائي متاح داخل الملف
+    if (extracted.length === 0 && rawData) {
+      JSON.stringify(rawData, (k, v) => {
+        if (typeof v === 'string' && v.trim() && !/^\d+$/.test(v.trim())) {
+          extracted.push(v.trim());
+        }
+        return v;
+      });
+    }
+
+    // إزالة التكرار لتنظيف القائمة
+    extracted = [...new Set(extracted)];
+
     extracted.forEach((textVal) => {
       pool.push({ word: textVal, packKey: key, icon: pack.icon });
     });
@@ -636,8 +668,8 @@ $('revealBtn').addEventListener('click', () => {
   if (state.wordQueue.length === 0) state.wordQueue = buildMergedWordPool();
   state.lastWord = state.wordQueue.pop();
   
-  $('wordText').textContent = state.lastWord.word;
-  const pack = PACKS[state.lastWord.packKey];
+  $('wordText').textContent = state.lastWord ? state.lastWord.word : 'لا توجد كلمات';
+  const pack = PACKS[state.lastWord ? state.lastWord.packKey : state.selectedPacks[0]];
   $('wordTag').textContent = `${pack.icon} ${pack.name[state.lang]}`;
 
   state.timeLeft = state.timerDuration;
