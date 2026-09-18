@@ -202,7 +202,7 @@
 <div id="screen-game" class="screen hidden flex-col home-bg">
   <div class="flex items-center justify-between px-4 py-2 shrink-0">
     <button id="endGameBtn" class="btn-ghost rounded-full px-3 py-1.5 text-[11px] font-bold">🏁 <span class="endTxt">إنهاء</span></button>
-    <div class="text-sm font-black glow-text tracking-widest">🎭 <span class="arabic">التمثيل</span></div>
+    <div class="text-sm font-black glow-text tracking-widest">🎭 <span class="arabic appTitleSpan">التمثيل</span></div>
     <div class="text-[11px] text-zinc-500 flex items-center gap-2">
       <span id="catNameTag"></span>
       <span class="opt-pill rounded-full px-2 py-0.5">🎯 <span id="targetScoreTag">5</span></span>
@@ -213,7 +213,7 @@
 
   <div class="flex-1 flex flex-col items-center justify-center px-6 min-h-0 relative">
     <div id="turnIntro" class="text-center">
-      <div class="text-zinc-400 text-sm mb-1 arabic">دور فريق</div>
+      <div id="turnTeamLabel" class="text-zinc-400 text-sm mb-1 arabic">دور فريق</div>
       <div id="currentTeamName" class="text-3xl font-black title-gradient mb-6"></div>
       <button id="revealBtn" class="btn-hero rounded-2xl px-8 py-5 text-lg font-black arabic">👆 اضغط لإظهار الكلمة</button>
     </div>
@@ -228,7 +228,7 @@
           </svg>
           <div id="timerNum" class="absolute inset-0 flex items-center justify-center text-2xl font-black">60</div>
         </div>
-        <button id="correctBtn" class="btn-correct rounded-2xl py-6 flex-1 h-24 font-black text-white text-lg">✅ <span class="arabic">صح</span> +1</button>
+        <button id="correctBtn" class="btn-correct rounded-2xl py-6 flex-1 h-24 font-black text-white text-lg">✅ <span id="correctBtnText" class="arabic">صح</span> +1</button>
       </div>
 
       <div id="wordCard" class="word-reveal home-card rounded-2xl px-6 py-8 w-full max-w-xs text-center">
@@ -240,7 +240,7 @@
     <div id="roundEnd" class="hidden flex-col items-center text-center">
       <div id="endIcon" class="text-5xl mb-3">⏰</div>
       <div id="endHeadline" class="text-xl font-black mb-1 arabic">خلص الوقت!</div>
-      <div class="text-zinc-400 text-sm mb-1 arabic">فريق <span id="endTeamName" class="text-purple-300 font-bold"></span></div>
+      <div class="text-zinc-400 text-sm mb-1 arabic"><span id="teamSubLabel">فريق</span> <span id="endTeamName" class="text-purple-300 font-bold"></span></div>
       <div class="text-4xl font-black glow-text mb-6"><span id="endRoundScore">+0</span></div>
       <button id="nextTeamBtn" class="btn-hero rounded-xl px-8 py-3.5 font-black arabic">التالي ⏩</button>
     </div>
@@ -251,7 +251,7 @@
 <div id="finalModal" class="hidden fixed inset-0 z-40 bg-black/85 backdrop-blur-sm flex items-center justify-center px-6">
   <div class="home-card rounded-2xl p-6 w-full max-w-sm text-center">
     <div class="text-5xl mb-3">🏆</div>
-    <h2 class="text-2xl font-black title-gradient mb-4 arabic">النتيجة النهائية</h2>
+    <h2 id="finalTitle" class="text-2xl font-black title-gradient mb-4 arabic">النتيجة النهائية</h2>
     <div id="finalScoreList" class="space-y-2 mb-6 text-left"></div>
     <button id="playAgainBtn" class="btn-hero w-full rounded-xl py-3 font-black arabic">لعبة جديدة</button>
   </div>
@@ -262,20 +262,17 @@ const PACKS = {
   movies: {
     icon: '🎬',
     name: { ar: 'أفلام ومسلسلات', en: 'Movies & Series' },
-    get filename() { return state.lang === 'ar' ? 'arabicMovies.json' : 'englishMovies.json'; },
-    words: []
+    filename: 'arabicMovies.json' 
   },
   players: {
     icon: '⚽',
     name: { ar: 'لاعيبة كرة قدم', en: 'Football Players' },
-    filename: 'players.json',
-    words: []
+    filename: 'players.json'
   },
   anime: {
     icon: '🀄',
     name: { ar: 'أنمي', en: 'Anime' },
-    filename: 'anime.json',
-    words: []
+    filename: 'anime.json'
   }
 };
 const PACK_ORDER = ['movies', 'players', 'anime'];
@@ -564,33 +561,16 @@ function shuffle(arr) {
   return arr;
 }
 
-// دالة متطورة تضمن استخراج جميع النصوص الصالحة من أي ملف JSON بغض النظر عن هيكله
-function extractWordsDeep(obj, list = []) {
-  if (!obj) return list;
-  if (typeof obj === 'string') {
-    const trimmed = obj.trim();
-    if (trimmed && !/^\d+$/.test(trimmed)) {
-      list.push(trimmed);
-    }
-  } else if (Array.isArray(obj)) {
-    obj.forEach(item => extractWordsDeep(item, list));
-  } else if (typeof obj === 'object') {
-    for (const key in obj) {
-      const val = obj[key];
-      // التعامل الذكي مع الفئات المقسمة للغات (مثل الأفلام)
-      if (key === 'ar' || key === 'arabic') {
-        if (state.lang === 'ar' && typeof val === 'string' && val.trim()) {
-          list.push(val.trim());
-        }
-        continue;
-      }
-      if (key === 'en' || key === 'english') {
-        if (state.lang === 'en' && typeof val === 'string' && val.trim()) {
-          list.push(val.trim());
-        }
-        continue;
-      }
-      extractWordsDeep(val, list);
+function extractWordsFromNode(node, list = []) {
+  if (!node) return list;
+  if (typeof node === 'string') {
+    const trimmed = node.trim();
+    if (trimmed && !/^\d+$/.test(trimmed)) list.push(trimmed);
+  } else if (Array.isArray(node)) {
+    node.forEach(item => extractWordsFromNode(item, list));
+  } else if (typeof node === 'object') {
+    for (const key in node) {
+      extractWordsFromNode(node[key], list);
     }
   }
   return list;
@@ -599,30 +579,51 @@ function extractWordsDeep(obj, list = []) {
 function buildMergedWordPool() {
   const pool = [];
   const cache = window._rawFiles || {};
+  
   state.selectedPacks.forEach((key) => {
-    const pack = PACKS[key];
-    const filename = typeof pack.filename === 'function' ? pack.filename : pack.filename; 
-    const rawData = cache[filename];
-    
-    let extracted = extractWordsDeep(rawData);
-    
-    // فحص احتياطي عام يمر على كل الـ JSON لو ملقاش مفاتيح لغات محددة (مثل لاعيبة كرة القدم والأنمي)
-    if (extracted.length === 0 && rawData) {
-      JSON.stringify(rawData, (k, v) => {
-        if (typeof v === 'string' && v.trim() && !/^\d+$/.test(v.trim())) {
-          extracted.push(v.trim());
-        }
-        return v;
-      });
+    let rawData = [];
+    if (key === 'movies') {
+      const filename = state.lang === 'ar' ? 'arabicMovies.json' : 'englishMovies.json';
+      rawData = cache[filename];
+    } else {
+      rawData = cache[PACKS[key].filename];
     }
 
-    // تصفية إضافية لإزالة أي قيم مكررة وضمان نظافة القائمة
-    extracted = [...new Set(extracted)];
+    let extracted = [];
+    if (key === 'movies') {
+      // للأفلام، قد تكون الهيكلية تحتوي على مصفوفة كائنات أو مفاتيح لغات
+      if (Array.isArray(rawData)) {
+        rawData.forEach(item => {
+          if (typeof item === 'string') {
+            const tr = item.trim();
+            if (tr) extracted.push(tr);
+          } else if (typeof item === 'object' && item !== null) {
+            // البحث عن النص داخل كائن الفيلم بناءً على اللغة الحالية
+            const targetVal = state.lang === 'ar' ? (item.ar || item.arabic || item.title_ar) : (item.en || item.english || item.title_en || item.title);
+            if (typeof targetVal === 'string' && targetVal.trim()) {
+              extracted.push(targetVal.trim());
+            } else {
+              // مسح شامل لو مفيش مفتاح صريح
+              extractWordsFromNode(item, extracted);
+            }
+          }
+        });
+      } else {
+        extractWordsFromNode(rawData, extracted);
+      }
+    } else {
+      // للاعيبة والأنمي، جلب كل النصوص المتاحة بشكل كامل ونظيف
+      extractWordsFromNode(rawData, extracted);
+    }
+
+    // تنقية وتثبيت الكلمات الفريدة
+    extracted = [...new Set(extracted.map(w => w.trim()).filter(w => w.length > 0 && !/^\d+$/.test(w)))];
 
     extracted.forEach((textVal) => {
-      pool.push({ word: textVal, packKey: key, icon: pack.icon });
+      pool.push({ word: textVal, packKey: key, icon: PACKS[key].icon });
     });
   });
+
   return shuffle(pool);
 }
 
@@ -630,6 +631,15 @@ function buildGameScreen() {
   const packLabels = state.selectedPacks.map((k) => PACKS[k].icon).join(' ');
   $('catNameTag').textContent = packLabels;
   $('targetScoreTag').textContent = state.targetScore;
+  
+  // تحديث النصوص الثابتة بناءً على اللغة المختارة
+  document.querySelectorAll('.endTxt').forEach(el => el.textContent = t('إنهاء', 'End'));
+  document.querySelectorAll('.appTitleSpan').forEach(el => el.textContent = t('التمثيل', 'Act It Out'));
+  $('turnTeamLabel').textContent = t('دور فريق', "Team's Turn");
+  $('teamSubLabel').textContent = t('فريق', 'Team');
+  $('correctBtnText').textContent = t('صح', 'Correct');
+  $('finalTitle').textContent = t('النتيجة النهائية', 'Final Scoreboard');
+  
   renderTeamStrip();
 }
 
@@ -658,6 +668,7 @@ function startTurn() {
 
   const cur = state.teams[state.currentTeamIndex];
   $('currentTeamName').textContent = cur.name;
+  $('revealBtn').textContent = t('👆 اضغط لإظهار الكلمة', '👆 Tap to Reveal Word');
 }
 
 $('revealBtn').addEventListener('click', () => {
@@ -668,7 +679,7 @@ $('revealBtn').addEventListener('click', () => {
   if (state.wordQueue.length === 0) state.wordQueue = buildMergedWordPool();
   state.lastWord = state.wordQueue.pop();
   
-  $('wordText').textContent = state.lastWord ? state.lastWord.word : 'لا توجد كلمات';
+  $('wordText').textContent = state.lastWord ? state.lastWord.word : t('لا توجد كلمات', 'No words available');
   const pack = PACKS[state.lastWord ? state.lastWord.packKey : state.selectedPacks[0]];
   $('wordTag').textContent = `${pack.icon} ${pack.name[state.lang]}`;
 
@@ -777,7 +788,7 @@ function showFinalBoard() {
     const item = document.createElement('div');
     item.className = `input-glass rounded-xl px-4 py-3 flex items-center justify-between ${isWinner ? 'border-purple-400 bg-purple-500/10' : ''}`;
     item.innerHTML = `
-      <div class="file-name flex items-center gap-3">
+      <div class="flex items-center gap-3">
         <span class="text-xl">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '👏'}</span>
         <span class="font-bold text-base ${state.lang === 'ar' ? 'arabic' : ''}">${t.name}</span>
       </div>
