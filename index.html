@@ -58,6 +58,17 @@
     transition: transform .12s ease, box-shadow .12s ease;
   }
   .btn-skip:active { transform: scale(0.96); box-shadow: 0 0 12px rgba(245,158,11,0.6); }
+  .btn-confirm {
+    background: linear-gradient(135deg, #8B5CF6, #6D28D9);
+    box-shadow: 0 0 22px rgba(139,92,246,0.55), 0 0 40px rgba(139,92,246,0.25);
+    transition: transform .12s ease, box-shadow .12s ease;
+    animation: confirmPulse 1.8s ease-in-out infinite;
+  }
+  .btn-confirm:active { transform: scale(0.96); }
+  @keyframes confirmPulse {
+    0%, 100% { box-shadow: 0 0 22px rgba(139,92,246,0.55), 0 0 40px rgba(139,92,246,0.25); }
+    50%      { box-shadow: 0 0 32px rgba(139,92,246,0.85), 0 0 60px rgba(139,92,246,0.45); }
+  }
   .input-glass {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.10);
@@ -70,7 +81,6 @@
   }
   .input-glass::placeholder { color: #52525B; }
 
-  /* ===== Category cards — comfortable sizing ===== */
   .cat-card {
     background: rgba(255,255,255,0.035);
     border: 1.5px solid rgba(255,255,255,0.10);
@@ -125,7 +135,6 @@
     color: #fff;
   }
 
-  /* ===== Team name inputs — comfortable ===== */
   .name-wrap {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.10);
@@ -150,7 +159,6 @@
   }
   .team-name-input::placeholder { color: #52525B; font-weight: 400; }
 
-  /* Timer ring transition */
   .timer-ring { transition: stroke-dashoffset 1s linear, stroke .3s ease; }
   .word-reveal { animation: popin .25s ease; }
   @keyframes popin { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -173,6 +181,10 @@
     40%  { filter: drop-shadow(0 0 12px rgba(245,158,11,0.9)); }
     100% { filter: drop-shadow(0 0 0 rgba(245,158,11,0)); }
   }
+
+  /* حالة العدّاد المتجمّد قبل التأكيد */
+  .timer-paused #timerRing { stroke: #C084FC !important; }
+  .timer-paused #timerNum { color: #C084FC; text-shadow: 0 0 12px rgba(192,132,252,0.6); }
 </style>
 </head>
 <body class="text-white">
@@ -182,17 +194,14 @@
 <!-- ============ SCREEN: SETUP ============ -->
 <div id="screen-setup" class="screen home-bg flex flex-col">
 
-  <!-- Header -->
   <div class="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
     <div class="w-10"></div>
     <div class="text-xl font-black glow-text tracking-widest">🎭 التمثيل</div>
     <button id="howToPlayBtn" class="btn-ghost rounded-full w-10 h-10 flex items-center justify-center text-lg">❓</button>
   </div>
 
-  <!-- Content -->
   <div class="flex-1 px-4 pb-4 flex flex-col gap-5 max-w-md w-full mx-auto">
 
-    <!-- Categories -->
     <div>
       <div class="flex items-center justify-between mb-3">
         <div class="text-sm font-bold text-zinc-300">اختر فئة أو أكثر</div>
@@ -201,7 +210,6 @@
       <div id="categoryGrid" class="grid grid-cols-3 gap-3"></div>
     </div>
 
-    <!-- Timer -->
     <div>
       <div class="text-sm font-bold text-zinc-300 mb-3">مدة الوقت</div>
       <div class="grid grid-cols-3 gap-3">
@@ -211,7 +219,6 @@
       </div>
     </div>
 
-    <!-- Teams counter -->
     <div>
       <div class="text-sm font-bold text-zinc-300 mb-3">عدد الفرق</div>
       <div class="input-glass flex items-center justify-between rounded-2xl px-4 py-3">
@@ -221,16 +228,13 @@
       </div>
     </div>
 
-    <!-- Team names -->
     <div>
       <div class="text-sm font-bold text-zinc-300 mb-3">أسماء الفرق (اختياري)</div>
       <div id="teamNamesList" class="grid grid-cols-2 gap-3"></div>
     </div>
 
-    <!-- spacer pushes button to bottom on tall screens -->
     <div class="flex-1 min-h-2"></div>
 
-    <!-- Start button -->
     <button id="startGameBtn" class="btn-hero w-full rounded-2xl py-4 text-lg font-black shrink-0" disabled>
       جاري تحميل البيانات... ⏳
     </button>
@@ -264,36 +268,56 @@
   <div id="teamStrip" class="flex gap-1.5 overflow-x-auto px-3 pb-2 shrink-0"></div>
 
   <div class="flex-1 flex flex-col items-center justify-center px-6 min-h-0 relative">
+
+    <!-- Turn intro -->
     <div id="turnIntro" class="text-center">
       <div class="text-zinc-400 text-sm mb-1">دور فريق</div>
       <div id="currentTeamName" class="text-3xl font-black title-gradient mb-6"></div>
       <button id="revealBtn" class="btn-hero rounded-2xl px-8 py-5 text-lg font-black">👆 اضغط لإظهار الكلمة</button>
     </div>
 
+    <!-- Active round -->
     <div id="roundActive" class="hidden flex-col items-center w-full">
 
-      <div class="flex items-center justify-center gap-5 w-full max-w-xs mb-4">
-        <div id="timerWrap" class="relative w-24 h-24 shrink-0">
-          <svg viewBox="0 0 100 100" class="w-24 h-24 -rotate-90">
-            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
-            <circle id="timerRing" cx="50" cy="50" r="44" fill="none" stroke="#8B5CF6" stroke-width="8"
-              stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="0" class="timer-ring"/>
-          </svg>
-          <div id="timerNum" class="absolute inset-0 flex items-center justify-center text-2xl font-black">60</div>
-        </div>
-        <button id="correctBtn" class="btn-correct rounded-2xl py-6 flex-1 h-24 font-black text-white text-lg">✅ صح +1</button>
-      </div>
-
-      <button id="skipBtn" class="btn-skip rounded-2xl w-full max-w-xs py-3.5 font-black text-white text-base mb-5">
-        ⏭️ تخطي (إعادة الوقت)
-      </button>
-
-      <div id="wordCard" class="word-reveal home-card rounded-2xl px-6 py-8 w-full max-w-xs text-center">
+      <!-- بطاقة الكلمة -->
+      <div id="wordCard" class="word-reveal home-card rounded-2xl px-6 py-8 w-full max-w-xs text-center mb-5">
         <div id="wordTag" class="text-[10px] tracking-widest text-purple-300 mb-1"></div>
         <div id="wordText" class="text-2xl font-black leading-snug"></div>
       </div>
+
+      <!-- العدّاد (متجمّد قبل التأكيد) -->
+      <div id="timerWrap" class="flex items-center justify-center w-full max-w-xs mb-4">
+        <div class="relative w-28 h-28 shrink-0 timer-paused" id="timerCircle">
+          <svg viewBox="0 0 100 100" class="w-28 h-28 -rotate-90">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+            <circle id="timerRing" cx="50" cy="50" r="44" fill="none" stroke="#C084FC" stroke-width="8"
+              stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="0" class="timer-ring"/>
+          </svg>
+          <div id="timerNum" class="absolute inset-0 flex items-center justify-center text-3xl font-black">60</div>
+        </div>
+      </div>
+
+      <!-- نص إرشادي -->
+      <div id="hintText" class="text-xs text-purple-300 mb-4 text-center font-bold">
+        اقرأ الاسم في هدوء، ثم اضغط تأكيد لبدء العدّاد
+      </div>
+
+      <!-- زر التأكيد -->
+      <button id="confirmBtn" class="btn-confirm rounded-2xl w-full max-w-xs py-4 font-black text-white text-lg mb-4">
+        ✅ تأكيد — ابدأ العدّاد
+      </button>
+
+      <!-- أزرار التحكم (تظهر بعد التأكيد) -->
+      <div id="actionBtns" class="hidden w-full max-w-xs flex flex-col gap-3">
+        <button id="correctBtn" class="btn-correct rounded-2xl py-4 w-full font-black text-white text-lg">✅ صح +1</button>
+        <button id="skipBtn" class="btn-skip rounded-2xl py-3.5 w-full font-black text-white text-base">
+          ⏭️ تخطي (إعادة الوقت)
+        </button>
+      </div>
+
     </div>
 
+    <!-- Round end -->
     <div id="roundEnd" class="hidden flex-col items-center text-center">
       <div id="endIcon" class="text-5xl mb-3">⏰</div>
       <div id="endHeadline" class="text-xl font-black mb-1">خلص الوقت!</div>
@@ -335,6 +359,7 @@ const state = {
   timeLeft: 60,
   timerId: null,
   roundActive: false,
+  timerRunning: false,     // هل العدّاد يعمل الآن؟
   targetScore: 5,
   deuceTriggered: false,
   gameOver: false,
@@ -392,6 +417,11 @@ function skipSound() {
   setTimeout(() => beep(660, 0.09, 'triangle', 0.14), 70);
   setTimeout(() => beep(820, 0.10, 'triangle', 0.14), 150);
 }
+function confirmSound() {
+  beep(660, 0.10, 'sine', 0.18);
+  setTimeout(() => beep(880, 0.12, 'sine', 0.18), 90);
+  setTimeout(() => beep(1170, 0.16, 'sine', 0.18), 200);
+}
 
 // ============ تبديل الشاشات ============
 function showScreen(id) {
@@ -405,9 +435,7 @@ function showScreen(id) {
 // ============ بناء شاشة الإعداد ============
 function updateCategoryHint() {
   const n = state.selectedPacks.length;
-  $('categoryHint').textContent = n > 0
-    ? `${n} مختارة`
-    : 'اختر فئة واحدة على الأقل';
+  $('categoryHint').textContent = n > 0 ? `${n} مختارة` : 'اختر فئة واحدة على الأقل';
 }
 
 function renderCategories() {
@@ -422,7 +450,6 @@ function renderCategories() {
     const card = document.createElement('button');
     card.type = 'button';
     card.className = `cat-card rounded-2xl w-full ${isSelected ? 'selected' : ''}`;
-
     card.innerHTML = `
       <div class="cat-icon">${pack.icon}</div>
       <div class="cat-name">${pack.name}</div>
@@ -487,10 +514,10 @@ $('howToPlayBtn').addEventListener('click', () => {
   const lines = [
     '🎯 كل فريق يأخذ دوره في تمثيل كلمة والباقي يخمّنون.',
     '🗂️ اختر فئة أو أكثر؛ لو اخترت أكثر من فئة، الكلمات تُسحب بشكل عشوائي.',
-    '👆 اضغط "إظهار الكلمة" وابدأ التمثيل فورًا.',
-    '⏱️ كلمة واحدة فقط في كل دور، والعداد يعد تنازليًا.',
+    '👆 اضغط "إظهار الكلمة"، ثم اقرأ الاسم في هدوء.',
+    '🟣 بعد القراءة، اضغط "تأكيد" ليبدأ العدّاد التنازلي.',
     '✅ لو الفريق خمّن صح اضغط "صح +1" وينتهي الدور فورًا.',
-    '⏭️ لو الكلمة صعبة، اضغط "تخطي" — تظهر كلمة جديدة ويُعاد ضبط العدّاد على المدة الكاملة من جديد.',
+    '⏭️ لو الكلمة صعبة، اضغط "تخطي" — تظهر كلمة جديدة ويُعاد ضبط العدّاد من جديد (ويمكنك قراءتها بهدوء قبل التأكيد).',
     '⏰ لو الوقت خلص من غير تخمين، الفريق يأخذ صفر وينتقل الدور.',
     '🏆 أول فريق يصل لـ 5 نقاط يفوز.',
     '🔥 لو الفريقان تعادلا 4-4، الهدف يزيد لـ 6 نقاط.'
@@ -565,6 +592,7 @@ $('startGameBtn').addEventListener('click', () => {
   state.deuceTriggered = false;
   state.gameOver = false;
   state.winner = null;
+  state.timerRunning = false;
 
   $('catNameTag').textContent = state.selectedPacks.map((k) => PACKS[k].icon).join(' ');
   $('targetScoreTag').textContent = state.targetScore;
@@ -643,30 +671,38 @@ function updateTimerUI() {
   ring.setAttribute('stroke', state.timeLeft <= 10 ? '#EF4444' : '#8B5CF6');
 }
 
+function freezeTimer() {
+  // تجميد العدّاد عند المدة الكاملة بدون تشغيل
+  clearInterval(state.timerId);
+  state.timerRunning = false;
+  state.timeLeft = state.timerDuration;
+  updateTimerUI();
+  $('timerCircle').classList.add('timer-paused');
+  $('confirmBtn').classList.remove('hidden');
+  $('actionBtns').classList.add('hidden');
+  $('hintText').classList.remove('hidden');
+}
+
 function startTimer() {
   clearInterval(state.timerId);
+  state.timerRunning = true;
   updateTimerUI();
+  $('timerCircle').classList.remove('timer-paused');
+  $('confirmBtn').classList.add('hidden');
+  $('actionBtns').classList.remove('hidden');
+  $('hintText').classList.add('hidden');
+
   state.timerId = setInterval(() => {
     state.timeLeft--;
     updateTimerUI();
     if (state.timeLeft <= 5 && state.timeLeft > 0) tickSound();
     if (state.timeLeft <= 0) {
       clearInterval(state.timerId);
+      state.timerRunning = false;
       buzzSound();
       endRound('timeout');
     }
   }, 1000);
-}
-
-function resetAndRestartTimer() {
-  clearInterval(state.timerId);
-  state.timeLeft = state.timerDuration;
-  const wrap = $('timerWrap');
-  wrap.classList.remove('timer-flash');
-  void wrap.offsetWidth;
-  wrap.classList.add('timer-flash');
-  updateTimerUI();
-  startTimer();
 }
 
 // ============ شاشة اللعب ============
@@ -688,6 +724,7 @@ function renderTeamStrip() {
 function startTurn() {
   clearInterval(state.timerId);
   state.roundActive = false;
+  state.timerRunning = false;
   renderTeamStrip();
 
   $('turnIntro').classList.remove('hidden');
@@ -699,6 +736,7 @@ function startTurn() {
   $('currentTeamName').textContent = state.teams[state.currentTeamIndex].name;
 }
 
+// ============ زر إظهار الكلمة (لا يشغل العدّاد) ============
 $('revealBtn').addEventListener('click', () => {
   ensureAudio();
   $('turnIntro').classList.add('hidden');
@@ -708,24 +746,35 @@ $('revealBtn').addEventListener('click', () => {
   const entry = pickNextWord();
   displayWord(entry, false);
 
-  state.timeLeft = state.timerDuration;
   state.roundActive = true;
-  resetAndRestartTimer();
+  // لا نبدأ العدّاد — نعرضه مجمّداً مع زر التأكيد
+  freezeTimer();
 });
 
-// ============ زر التخطي ============
+// ============ زر التأكيد (يبدأ العدّاد) ============
+$('confirmBtn').addEventListener('click', () => {
+  if (!state.roundActive) return;
+  if (state.timerRunning) return;
+  ensureAudio();
+  confirmSound();
+  startTimer();
+});
+
+// ============ زر التخطي (يعيد الكلمة + يجمّد العدّاد + يطلب تأكيد جديد) ============
 $('skipBtn').addEventListener('click', () => {
   if (!state.roundActive) return;
   skipSound();
   const entry = pickNextWord();
   displayWord(entry, true);
-  resetAndRestartTimer();
+  // العودة لمرحلة القراءة الهادئة: تجميد العدّاد + إظهار زر التأكيد
+  freezeTimer();
 });
 
 // ============ زر الإجابة الصحيحة ============
 $('correctBtn').addEventListener('click', () => {
   if (!state.roundActive) return;
   clearInterval(state.timerId);
+  state.timerRunning = false;
   correctSound();
   state.teams[state.currentTeamIndex].score += 1;
   endRound('correct');
@@ -748,6 +797,7 @@ function checkDeuceAndWinner() {
 
 function endRound(outcome) {
   state.roundActive = false;
+  state.timerRunning = false;
   checkDeuceAndWinner();
 
   $('roundActive').classList.add('hidden');
