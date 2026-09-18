@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>التمثيل</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
@@ -10,11 +10,14 @@
   :root { color-scheme: dark; }
   html, body {
     height: 100%;
+    height: 100dvh;
     overflow: hidden;
     background: #09090B;
     font-family: 'Cairo', sans-serif;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior: none;
+    position: fixed;
+    inset: 0;
   }
   .screen { height: 100dvh; width: 100%; }
   .home-bg {
@@ -30,7 +33,6 @@
     filter: drop-shadow(0 0 14px rgba(236,72,153,0.45)) drop-shadow(0 0 28px rgba(139,92,246,0.35));
     letter-spacing: 0.02em;
   }
-  .subtitle-glow { color: #B794F4; text-shadow: 0 0 10px rgba(167,139,250,0.6); }
   .glow-text { color: #C4B5FD; text-shadow: 0 0 8px #8B5CF6, 0 0 24px #8B5CF6, 0 0 48px #6D28D9; }
   .home-card {
     background: rgba(255,255,255,0.035);
@@ -52,7 +54,6 @@
   .btn-ghost:active { transform: scale(0.96); }
   .btn-correct { background: linear-gradient(135deg, #22C55E, #15803D); box-shadow: 0 0 20px rgba(34,197,94,0.45); }
   .btn-correct:active { transform: scale(0.96); }
-  /* ============ زر التخطي ============ */
   .btn-skip {
     background: linear-gradient(135deg, #F59E0B, #B45309);
     box-shadow: 0 0 20px rgba(245,158,11,0.45);
@@ -70,33 +71,48 @@
     box-shadow: 0 0 0 3px rgba(139,92,246,0.15), 0 0 16px rgba(139,92,246,0.25);
   }
   .input-glass::placeholder { color: #52525B; }
+
+  /* ===== Compact category card (grid 3-col) ===== */
   .cat-card {
     background: rgba(255,255,255,0.035);
     border: 1.5px solid rgba(255,255,255,0.10);
     transition: all .15s ease;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 8px 4px;
+    text-align: center;
+    cursor: pointer;
   }
   .cat-card.selected {
     border-color: #C084FC;
-    box-shadow: 0 0 0 2px rgba(139,92,246,0.25), 0 0 18px rgba(139,92,246,0.4);
+    box-shadow: 0 0 0 2px rgba(139,92,246,0.25), 0 0 14px rgba(139,92,246,0.4);
     background: rgba(139,92,246,0.10);
   }
   .cat-card:active { transform: scale(0.97); }
+  .cat-icon { font-size: 20px; line-height: 1; }
+  .cat-name { font-size: 10px; font-weight: 800; line-height: 1.15; }
   .cat-check {
-    width: 22px; height: 22px; border-radius: 7px;
-    border: 1.5px solid rgba(255,255,255,0.25);
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 15px; height: 15px; border-radius: 5px;
+    border: 1.2px solid rgba(255,255,255,0.25);
     background: rgba(255,255,255,0.04);
     display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    font-size: 9px; font-weight: 900;
     transition: all .15s ease;
-    font-size: 13px; font-weight: 900;
-    color: white;
+    color: #fff;
   }
   .cat-card.selected .cat-check {
     background: linear-gradient(135deg, #EC4899, #8B5CF6);
     border-color: transparent;
-    box-shadow: 0 0 10px rgba(236,72,153,0.5);
+    box-shadow: 0 0 8px rgba(236,72,153,0.5);
   }
+
   .opt-pill {
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.12);
@@ -119,8 +135,6 @@
   .toast { animation: fadein .2s ease, fadeout .3s ease 2.4s forwards; }
   @keyframes fadein { from { opacity:0; transform: translate(50%, 10px);} to { opacity:1; transform: translate(50%,0);} }
   @keyframes fadeout { to { opacity: 0; } }
-
-  /* حركة انزلاق عند تبديل الكلمة بعد التخطي */
   .word-swap { animation: swap .28s ease; }
   @keyframes swap {
     0%   { transform: translateX(0) scale(1); opacity: 1; }
@@ -128,13 +142,64 @@
     65%  { transform: translateX(14px) scale(0.94); opacity: 0.4; }
     100% { transform: translateX(0) scale(1); opacity: 1; }
   }
-
-  /* وميض على حلقة العدّاد لحظة إعادة الضبط */
   .timer-flash { animation: flash .45s ease; }
   @keyframes flash {
     0%   { filter: drop-shadow(0 0 0 rgba(245,158,11,0)); }
     40%  { filter: drop-shadow(0 0 12px rgba(245,158,11,0.9)); }
     100% { filter: drop-shadow(0 0 0 rgba(245,158,11,0)); }
+  }
+
+  /* ===== Setup screen — no scroll, compact ===== */
+  #screen-setup {
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== Team name inputs grid ===== */
+  #teamNamesList {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  #teamNamesList .name-wrap {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 10px;
+    padding: 0 8px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  #teamNamesList .name-wrap:focus-within {
+    border-color: rgba(196,132,252,0.6);
+    box-shadow: 0 0 0 2px rgba(139,92,246,0.15), 0 0 12px rgba(139,92,246,0.25);
+  }
+  .team-name-input {
+    width: 100%;
+    background: transparent;
+    outline: none;
+    font-size: 12px;
+    padding: 7px 0;
+    color: #fff;
+    font-family: 'Cairo', sans-serif;
+    text-align: center;
+  }
+  .team-name-input::placeholder { color: #52525B; }
+
+  /* Small screen tweak — 1 col inputs on very narrow */
+  @media (max-width: 340px) {
+    #teamNamesList { grid-template-columns: 1fr; }
+  }
+
+  /* Very short screens — hide optional label texts */
+  @media (max-height: 640px) {
+    .setup-label { display: none !important; }
+    .cat-icon { font-size: 18px; }
+    .cat-name { font-size: 9px; }
+  }
+  @media (max-height: 560px) {
+    #teamNamesList { grid-template-columns: repeat(3, 1fr); }
+    .setup-title { font-size: 15px !important; }
   }
 </style>
 </head>
@@ -143,71 +208,65 @@
 <div id="toastHost" class="fixed top-3 left-1/2 z-50 pointer-events-none"></div>
 
 <!-- ============ SCREEN: SETUP ============ -->
-<div id="screen-setup" class="screen home-bg flex flex-col overflow-hidden">
+<div id="screen-setup" class="home-bg">
 
   <!-- Header -->
-  <div class="flex items-center justify-between px-4 py-3 shrink-0">
+  <div class="flex items-center justify-between px-4 py-2 shrink-0">
     <div class="w-9"></div>
-    <div class="text-lg font-black glow-text tracking-widest">🎭 التمثيل</div>
+    <div class="setup-title text-lg font-black glow-text tracking-widest">🎭 التمثيل</div>
     <button id="howToPlayBtn" class="btn-ghost rounded-full w-9 h-9 flex items-center justify-center text-lg">❓</button>
   </div>
 
-  <!-- Scrollable content -->
-  <div class="flex-1 overflow-y-auto px-4 pb-3 space-y-4">
-
-    <!-- Hero card -->
-    <div class="home-card rounded-2xl p-4 text-center">
-      <div class="hero-icon text-4xl mb-1">🎭</div>
-      <h1 class="text-2xl font-black title-gradient leading-tight">التمثيل</h1>
-      <p class="text-zinc-500 text-[11px] mt-1">لعبة تمثيل جماعية من موبايل واحد فقط</p>
-    </div>
+  <!-- Content — no scroll, compact flex column -->
+  <div class="flex-1 min-h-0 flex flex-col gap-2.5 px-4 pb-2">
 
     <!-- Categories -->
-    <div>
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-[11px] tracking-widest text-zinc-400">اختر فئة أو أكثر</div>
+    <div class="shrink-0">
+      <div class="flex items-center justify-between mb-1.5">
+        <div class="setup-label text-[10px] tracking-widest text-zinc-400">اختر فئة أو أكثر</div>
         <div id="categoryHint" class="text-[10px] text-purple-300"></div>
       </div>
-      <div id="categoryGrid" class="grid grid-cols-1 gap-2"></div>
+      <div id="categoryGrid" class="grid grid-cols-3 gap-2"></div>
     </div>
 
     <!-- Timer -->
-    <div>
-      <div class="text-[11px] tracking-widest text-zinc-400 mb-2">مدة الوقت</div>
+    <div class="shrink-0">
+      <div class="setup-label text-[10px] tracking-widest text-zinc-400 mb-1.5">مدة الوقت</div>
       <div class="grid grid-cols-3 gap-2">
-        <button data-timer="30" class="timer-btn opt-pill rounded-xl py-2.5 font-black">30 ثانية</button>
-        <button data-timer="60" class="timer-btn opt-pill rounded-xl py-2.5 font-black selected">60 ثانية</button>
-        <button data-timer="90" class="timer-btn opt-pill rounded-xl py-2.5 font-black">90 ثانية</button>
+        <button data-timer="30" class="timer-btn opt-pill rounded-lg py-2 text-[13px] font-black">30 ثانية</button>
+        <button data-timer="60" class="timer-btn opt-pill rounded-lg py-2 text-[13px] font-black selected">60 ثانية</button>
+        <button data-timer="90" class="timer-btn opt-pill rounded-lg py-2 text-[13px] font-black">90 ثانية</button>
       </div>
     </div>
 
-    <!-- Teams count -->
-    <div>
-      <div class="text-[11px] tracking-widest text-zinc-400 mb-2">عدد الفرق</div>
-      <div class="input-glass flex items-center justify-between rounded-xl px-4 py-2.5">
-        <button id="teamMinus" class="btn-ghost rounded-lg w-9 h-9 text-xl font-black flex items-center justify-center">−</button>
-        <div id="teamCountDisplay" class="text-2xl font-black">2</div>
-        <button id="teamPlus" class="btn-ghost rounded-lg w-9 h-9 text-xl font-black flex items-center justify-center">+</button>
+    <!-- Teams counter -->
+    <div class="shrink-0">
+      <div class="setup-label text-[10px] tracking-widest text-zinc-400 mb-1.5">عدد الفرق</div>
+      <div class="input-glass flex items-center justify-between rounded-lg px-3 py-1">
+        <button id="teamMinus" class="btn-ghost rounded-md w-8 h-8 text-lg font-black flex items-center justify-center">−</button>
+        <div id="teamCountDisplay" class="text-xl font-black">2</div>
+        <button id="teamPlus" class="btn-ghost rounded-md w-8 h-8 text-lg font-black flex items-center justify-center">+</button>
       </div>
     </div>
 
-    <!-- Team names -->
-    <div>
-      <div class="text-[11px] tracking-widest text-zinc-400 mb-2">أسماء الفرق (اختياري)</div>
-      <div id="teamNamesList" class="space-y-2"></div>
+    <!-- Team names — takes remaining height, no scroll -->
+    <div class="flex-1 min-h-0 flex flex-col">
+      <div class="setup-label text-[10px] tracking-widest text-zinc-400 mb-1.5 shrink-0">أسماء الفرق (اختياري)</div>
+      <div id="teamNamesList" class="min-h-0"></div>
     </div>
 
   </div>
 
   <!-- Start button -->
-  <div class="shrink-0 px-4 pb-4 pt-1">
-    <button id="startGameBtn" class="btn-hero w-full rounded-xl py-3.5 text-lg font-black" disabled>جاري تحميل البيانات... ⏳</button>
+  <div class="shrink-0 px-4 pb-3 pt-1">
+    <button id="startGameBtn" class="btn-hero w-full rounded-xl py-3 text-base font-black" disabled>جاري تحميل البيانات... ⏳</button>
   </div>
+
 </div>
 
 <!-- ============ HOW TO PLAY MODAL ============ -->
 <div id="howToModal" class="hidden fixed inset-0 z-40 bg-black/85 backdrop-blur-sm flex items-center justify-center px-6">
-  <div class="home-card rounded-2xl p-6 w-full max-w-sm text-center max-h-[80vh] overflow-y-auto">
+  <div class="home-card rounded-2xl p-6 w-full max-w-sm text-center max-h-[85vh] overflow-y-auto">
     <div class="text-4xl mb-3">📖</div>
     <h2 class="text-xl font-black title-gradient mb-4">قواعد اللعبة</h2>
     <div id="howToBody" class="text-sm text-zinc-300 leading-relaxed text-right space-y-2"></div>
@@ -238,7 +297,6 @@
 
     <div id="roundActive" class="hidden flex-col items-center w-full">
 
-      <!-- Timer + Correct button row -->
       <div class="flex items-center justify-center gap-5 w-full max-w-xs mb-4">
         <div id="timerWrap" class="relative w-24 h-24 shrink-0">
           <svg viewBox="0 0 100 100" class="w-24 h-24 -rotate-90">
@@ -251,7 +309,6 @@
         <button id="correctBtn" class="btn-correct rounded-2xl py-6 flex-1 h-24 font-black text-white text-lg">✅ صح +1</button>
       </div>
 
-      <!-- Skip button row -->
       <button id="skipBtn" class="btn-skip rounded-2xl w-full max-w-xs py-3.5 font-black text-white text-base mb-5">
         ⏭️ تخطي (إعادة الوقت)
       </button>
@@ -385,18 +442,24 @@ function renderCategories() {
   PACK_ORDER.forEach((key) => {
     const pack = PACKS[key];
     const isSelected = state.selectedPacks.includes(key);
+
     const card = document.createElement('button');
     card.type = 'button';
-    card.className = `cat-card rounded-xl px-4 py-3 flex items-center gap-3 text-right w-full ${isSelected ? 'selected' : ''}`;
+    card.className = `cat-card rounded-lg w-full ${isSelected ? 'selected' : ''}`;
+
     card.innerHTML = `
-      <div class="text-2xl">${pack.icon}</div>
-      <div class="flex-1"><div class="font-bold text-sm">${pack.name}</div></div>
+      <div class="cat-icon">${pack.icon}</div>
+      <div class="cat-name">${pack.name}</div>
       <div class="cat-check">${isSelected ? '✓' : ''}</div>
     `;
+
     card.addEventListener('click', () => {
       const idx = state.selectedPacks.indexOf(key);
       if (idx >= 0) {
-        if (state.selectedPacks.length === 1) { toast('لازم فئة واحدة على الأقل'); return; }
+        if (state.selectedPacks.length === 1) {
+          toast('لازم فئة واحدة على الأقل');
+          return;
+        }
         state.selectedPacks.splice(idx, 1);
         card.classList.remove('selected');
         card.querySelector('.cat-check').textContent = '';
@@ -407,8 +470,10 @@ function renderCategories() {
       }
       updateCategoryHint();
     });
+
     grid.appendChild(card);
   });
+
   updateCategoryHint();
 }
 
@@ -417,11 +482,11 @@ function renderTeamNameInputs() {
   list.innerHTML = '';
   for (let i = 0; i < state.teamCount; i++) {
     const wrap = document.createElement('div');
-    wrap.className = 'input-glass rounded-xl px-3';
+    wrap.className = 'name-wrap';
     wrap.innerHTML = `
       <input type="text" maxlength="14" data-idx="${i}"
         placeholder="فريق ${i + 1}"
-        class="team-name-input w-full bg-transparent outline-none text-sm py-3 text-white placeholder-zinc-600" />
+        class="team-name-input" />
     `;
     list.appendChild(wrap);
   }
@@ -430,6 +495,7 @@ function renderTeamNameInputs() {
 function buildSetupScreen() {
   renderCategories();
   renderTeamNameInputs();
+
   const startBtn = $('startGameBtn');
   if (dataLoaded) {
     startBtn.disabled = false;
@@ -591,7 +657,7 @@ function displayWord(entry, animate = false) {
   $('wordTag').textContent = `${pack.icon} ${pack.name}`;
 }
 
-// ============ إدارة العدّاد (موحّد) ============
+// ============ إدارة العدّاد ============
 function updateTimerUI() {
   $('timerNum').textContent = state.timeLeft;
   const fraction = Math.max(0, state.timeLeft) / state.timerDuration;
@@ -601,7 +667,6 @@ function updateTimerUI() {
   ring.setAttribute('stroke', state.timeLeft <= 10 ? '#EF4444' : '#8B5CF6');
 }
 
-// تبدأ العدّاد من state.timeLeft الحالي
 function startTimer() {
   clearInterval(state.timerId);
   updateTimerUI();
@@ -617,17 +682,13 @@ function startTimer() {
   }, 1000);
 }
 
-// تعيد ضبط العدّاد للمدة الكاملة + وميض بصري + تشغيل العد التنازلي
 function resetAndRestartTimer() {
   clearInterval(state.timerId);
   state.timeLeft = state.timerDuration;
-
-  // إزالة الوميض السابق وإعادة تشغيله
   const wrap = $('timerWrap');
   wrap.classList.remove('timer-flash');
   void wrap.offsetWidth;
   wrap.classList.add('timer-flash');
-
   updateTimerUI();
   startTimer();
 }
@@ -676,19 +737,13 @@ $('revealBtn').addEventListener('click', () => {
   resetAndRestartTimer();
 });
 
-// ============ زر التخطي (تخطي + إعادة ضبط الوقت) ============
+// ============ زر التخطي ============
 $('skipBtn').addEventListener('click', () => {
-  if (!state.roundActive) return;   // لا يعمل إلا خلال الدور الفعلي
+  if (!state.roundActive) return;
   skipSound();
-
-  // 1) كلمة جديدة
   const entry = pickNextWord();
   displayWord(entry, true);
-
-  // 2) إعادة العدّاد للمدة الكاملة (30/60/90) وإعادة التشغيل فورًا
   resetAndRestartTimer();
-
-  // 3) لا إنهاء للدور ولا تبديل للفريق
 });
 
 // ============ زر الإجابة الصحيحة ============
