@@ -52,6 +52,13 @@
   .btn-ghost:active { transform: scale(0.96); }
   .btn-correct { background: linear-gradient(135deg, #22C55E, #15803D); box-shadow: 0 0 20px rgba(34,197,94,0.45); }
   .btn-correct:active { transform: scale(0.96); }
+  /* ============ زر التخطي ============ */
+  .btn-skip {
+    background: linear-gradient(135deg, #F59E0B, #B45309);
+    box-shadow: 0 0 20px rgba(245,158,11,0.45);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .btn-skip:active { transform: scale(0.96); box-shadow: 0 0 12px rgba(245,158,11,0.6); }
   .input-glass {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.10);
@@ -112,6 +119,15 @@
   .toast { animation: fadein .2s ease, fadeout .3s ease 2.4s forwards; }
   @keyframes fadein { from { opacity:0; transform: translate(50%, 10px);} to { opacity:1; transform: translate(50%,0);} }
   @keyframes fadeout { to { opacity: 0; } }
+
+  /* حركة إضافية عند تبديل الكلمة بعد التخطي */
+  .word-swap { animation: swap .28s ease; }
+  @keyframes swap {
+    0%   { transform: translateX(0) scale(1); opacity: 1; }
+    35%  { transform: translateX(-14px) scale(0.94); opacity: 0.4; }
+    65%  { transform: translateX(14px) scale(0.94); opacity: 0.4; }
+    100% { transform: translateX(0) scale(1); opacity: 1; }
+  }
 </style>
 </head>
 <body class="text-white">
@@ -213,7 +229,9 @@
     </div>
 
     <div id="roundActive" class="hidden flex-col items-center w-full">
-      <div class="flex items-center justify-center gap-5 w-full max-w-xs mb-6">
+
+      <!-- Timer + Correct button row -->
+      <div class="flex items-center justify-center gap-5 w-full max-w-xs mb-4">
         <div class="relative w-24 h-24 shrink-0">
           <svg viewBox="0 0 100 100" class="w-24 h-24 -rotate-90">
             <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
@@ -224,6 +242,11 @@
         </div>
         <button id="correctBtn" class="btn-correct rounded-2xl py-6 flex-1 h-24 font-black text-white text-lg">✅ صح +1</button>
       </div>
+
+      <!-- Skip button row (full width, below correct) -->
+      <button id="skipBtn" class="btn-skip rounded-2xl w-full max-w-xs py-3.5 font-black text-white text-base mb-5">
+        ⏭️ تخطي
+      </button>
 
       <div id="wordCard" class="word-reveal home-card rounded-2xl px-6 py-8 w-full max-w-xs text-center">
         <div id="wordTag" class="text-[10px] tracking-widest text-purple-300 mb-1"></div>
@@ -279,6 +302,7 @@ const state = {
   teams: [],
   currentTeamIndex: 0,
   wordQueue: [],
+  usedWords: new Set(),   // لتفادي تكرار الكلمة خلال نفس الجلسة
   lastWord: null,
   timeLeft: 60,
   timerId: null,
@@ -335,6 +359,7 @@ function beep(freq, duration, type = 'sine', gainVal = 0.18) {
 function tickSound() { beep(880, 0.08, 'square', 0.12); }
 function buzzSound() { beep(160, 0.5, 'sawtooth', 0.22); setTimeout(() => beep(120, 0.6, 'sawtooth', 0.22), 150); }
 function correctSound() { beep(1046, 0.12, 'sine', 0.16); setTimeout(() => beep(1318, 0.14, 'sine', 0.16), 90); }
+function skipSound() { beep(520, 0.08, 'triangle', 0.14); setTimeout(() => beep(400, 0.09, 'triangle', 0.14), 70); }
 
 // ============ تبديل الشاشات ============
 function showScreen(id) {
@@ -435,6 +460,7 @@ $('howToPlayBtn').addEventListener('click', () => {
     '👆 اضغط "إظهار الكلمة" وابدأ التمثيل فورًا.',
     '⏱️ كلمة واحدة فقط في كل دور، والعداد يعد تنازليًا.',
     '✅ لو الفريق خمّن صح اضغط "صح +1" وينتهي الدور فورًا.',
+    '⏭️ لو الكلمة صعبة أو مش واضحة، اضغط "تخطي" لتظهر كلمة جديدة فورًا بدون إنهاء الدور.',
     '⏰ لو الوقت خلص من غير تخمين، الفريق يأخذ صفر وينتقل الدور.',
     '🏆 أول فريق يصل لـ 5 نقاط يفوز.',
     '🔥 لو الفريقان تعادلا 4-4، الهدف يزيد لـ 6 نقاط.'
@@ -488,7 +514,6 @@ async function loadAllData() {
   window._rawFiles = cache;
   dataLoaded = true;
 
-  // تحديث شاشة الإعداد بعد التحميل
   buildSetupScreen();
 }
 
@@ -513,6 +538,7 @@ $('startGameBtn').addEventListener('click', () => {
   });
 
   state.wordQueue = buildMergedWordPool();
+  state.usedWords = new Set();
   state.lastWord = null;
   state.currentTeamIndex = 0;
   state.targetScore = 5;
@@ -558,6 +584,53 @@ function buildMergedWordPool() {
   return shuffle(unique);
 }
 
+// ============ اختيار كلمة جديدة (تُستخدم للعرض العادي وعند التخطي) ============
+function pickNextWord() {
+  // لو الطابور خلص، نعيد بناءه
+  if (state.wordQueue.length === 0) {
+    state.wordQueue = buildMergedWordPool();
+    // لو برضه فاضي (لا توجد بيانات)
+    if (state.wordQueue.length === 0) return null;
+  }
+
+  let picked = state.wordQueue.pop();
+
+  // حاول تفادي تكرار الكلمة الأخيرة
+  let attempts = 0;
+  while (state.lastWord && picked.word === state.lastWord.word && attempts < 5 && state.wordQueue.length > 0) {
+    state.wordQueue.unshift(picked);
+    picked = state.wordQueue.pop();
+    attempts++;
+  }
+
+  state.lastWord = picked;
+  state.usedWords.add(picked.word);
+  return picked;
+}
+
+// ============ عرض الكلمة الحالية ============
+function displayWord(entry, animate = false) {
+  const card = $('wordCard');
+
+  if (!entry) {
+    $('wordText').textContent = 'لا توجد كلمات';
+    $('wordTag').textContent = '';
+    return;
+  }
+
+  // حركة انزلاق عند التخطي
+  if (animate) {
+    card.classList.remove('word-swap');
+    // إجبار إعادة تشغيل الأنيميشن
+    void card.offsetWidth;
+    card.classList.add('word-swap');
+  }
+
+  $('wordText').textContent = entry.word;
+  const pack = PACKS[entry.packKey];
+  $('wordTag').textContent = `${pack.icon} ${pack.name}`;
+}
+
 // ============ شاشة اللعب ============
 function renderTeamStrip() {
   const strip = $('teamStrip');
@@ -595,12 +668,8 @@ $('revealBtn').addEventListener('click', () => {
   $('roundActive').classList.remove('hidden');
   $('roundActive').classList.add('flex');
 
-  if (state.wordQueue.length === 0) state.wordQueue = buildMergedWordPool();
-  state.lastWord = state.wordQueue.pop();
-
-  $('wordText').textContent = state.lastWord ? state.lastWord.word : 'لا توجد كلمات';
-  const pack = PACKS[state.lastWord ? state.lastWord.packKey : state.selectedPacks[0]];
-  $('wordTag').textContent = `${pack.icon} ${pack.name}`;
+  const entry = pickNextWord();
+  displayWord(entry, false);
 
   state.timeLeft = state.timerDuration;
   state.roundActive = true;
@@ -627,6 +696,18 @@ function updateTimerUI() {
   ring.setAttribute('stroke', state.timeLeft <= 10 ? '#EF4444' : '#8B5CF6');
 }
 
+// ============ زر التخطي ============
+$('skipBtn').addEventListener('click', () => {
+  if (!state.roundActive) return;   // لا يعمل إلا خلال الدور الفعلي
+  skipSound();
+
+  const entry = pickNextWord();
+  displayWord(entry, true);         // animat = true → انزلاق بصري
+
+  // ملاحظة: لا نلمس العداد، ولا نوقف الدور، ولا ننتقل للفريق التالي
+});
+
+// ============ زر الإجابة الصحيحة ============
 $('correctBtn').addEventListener('click', () => {
   if (!state.roundActive) return;
   clearInterval(state.timerId);
@@ -721,10 +802,7 @@ $('playAgainBtn').addEventListener('click', () => {
 });
 
 // ============ التشغيل ============
-// 1) بناء الواجهة فورًا عند تحميل الصفحة (قبل وصول البيانات)
 buildSetupScreen();
-
-// 2) تحميل البيانات في الخلفية ثم تحديث الواجهة
 loadAllData();
 </script>
 </body>
