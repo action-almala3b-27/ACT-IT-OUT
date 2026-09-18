@@ -120,13 +120,21 @@
   @keyframes fadein { from { opacity:0; transform: translate(50%, 10px);} to { opacity:1; transform: translate(50%,0);} }
   @keyframes fadeout { to { opacity: 0; } }
 
-  /* حركة إضافية عند تبديل الكلمة بعد التخطي */
+  /* حركة انزلاق عند تبديل الكلمة بعد التخطي */
   .word-swap { animation: swap .28s ease; }
   @keyframes swap {
     0%   { transform: translateX(0) scale(1); opacity: 1; }
     35%  { transform: translateX(-14px) scale(0.94); opacity: 0.4; }
     65%  { transform: translateX(14px) scale(0.94); opacity: 0.4; }
     100% { transform: translateX(0) scale(1); opacity: 1; }
+  }
+
+  /* وميض على حلقة العدّاد لحظة إعادة الضبط */
+  .timer-flash { animation: flash .45s ease; }
+  @keyframes flash {
+    0%   { filter: drop-shadow(0 0 0 rgba(245,158,11,0)); }
+    40%  { filter: drop-shadow(0 0 12px rgba(245,158,11,0.9)); }
+    100% { filter: drop-shadow(0 0 0 rgba(245,158,11,0)); }
   }
 </style>
 </head>
@@ -232,7 +240,7 @@
 
       <!-- Timer + Correct button row -->
       <div class="flex items-center justify-center gap-5 w-full max-w-xs mb-4">
-        <div class="relative w-24 h-24 shrink-0">
+        <div id="timerWrap" class="relative w-24 h-24 shrink-0">
           <svg viewBox="0 0 100 100" class="w-24 h-24 -rotate-90">
             <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
             <circle id="timerRing" cx="50" cy="50" r="44" fill="none" stroke="#8B5CF6" stroke-width="8"
@@ -243,9 +251,9 @@
         <button id="correctBtn" class="btn-correct rounded-2xl py-6 flex-1 h-24 font-black text-white text-lg">✅ صح +1</button>
       </div>
 
-      <!-- Skip button row (full width, below correct) -->
+      <!-- Skip button row -->
       <button id="skipBtn" class="btn-skip rounded-2xl w-full max-w-xs py-3.5 font-black text-white text-base mb-5">
-        ⏭️ تخطي
+        ⏭️ تخطي (إعادة الوقت)
       </button>
 
       <div id="wordCard" class="word-reveal home-card rounded-2xl px-6 py-8 w-full max-w-xs text-center">
@@ -277,21 +285,9 @@
 <script>
 // ============ إعداد الفئات ============
 const PACKS = {
-  movies: {
-    icon: '🎬',
-    name: 'أفلام ومسلسلات',
-    filename: 'movies.json'
-  },
-  players: {
-    icon: '⚽',
-    name: 'لاعيبة كرة قدم',
-    filename: 'players.json'
-  },
-  anime: {
-    icon: '🀄',
-    name: 'أنمي',
-    filename: 'anime.json'
-  }
+  movies: { icon: '🎬', name: 'أفلام ومسلسلات', filename: 'movies.json' },
+  players: { icon: '⚽', name: 'لاعيبة كرة قدم', filename: 'players.json' },
+  anime: { icon: '🀄', name: 'أنمي', filename: 'anime.json' }
 };
 const PACK_ORDER = ['movies', 'players', 'anime'];
 
@@ -302,7 +298,7 @@ const state = {
   teams: [],
   currentTeamIndex: 0,
   wordQueue: [],
-  usedWords: new Set(),   // لتفادي تكرار الكلمة خلال نفس الجلسة
+  usedWords: new Set(),
   lastWord: null,
   timeLeft: 60,
   timerId: null,
@@ -359,7 +355,11 @@ function beep(freq, duration, type = 'sine', gainVal = 0.18) {
 function tickSound() { beep(880, 0.08, 'square', 0.12); }
 function buzzSound() { beep(160, 0.5, 'sawtooth', 0.22); setTimeout(() => beep(120, 0.6, 'sawtooth', 0.22), 150); }
 function correctSound() { beep(1046, 0.12, 'sine', 0.16); setTimeout(() => beep(1318, 0.14, 'sine', 0.16), 90); }
-function skipSound() { beep(520, 0.08, 'triangle', 0.14); setTimeout(() => beep(400, 0.09, 'triangle', 0.14), 70); }
+function skipSound() {
+  beep(520, 0.08, 'triangle', 0.14);
+  setTimeout(() => beep(660, 0.09, 'triangle', 0.14), 70);
+  setTimeout(() => beep(820, 0.10, 'triangle', 0.14), 150);
+}
 
 // ============ تبديل الشاشات ============
 function showScreen(id) {
@@ -380,32 +380,23 @@ function updateCategoryHint() {
 function renderCategories() {
   const grid = $('categoryGrid');
   grid.innerHTML = '';
-
   if (state.selectedPacks.length === 0) state.selectedPacks = [PACK_ORDER[0]];
 
   PACK_ORDER.forEach((key) => {
     const pack = PACKS[key];
     const isSelected = state.selectedPacks.includes(key);
-
     const card = document.createElement('button');
     card.type = 'button';
     card.className = `cat-card rounded-xl px-4 py-3 flex items-center gap-3 text-right w-full ${isSelected ? 'selected' : ''}`;
-
     card.innerHTML = `
       <div class="text-2xl">${pack.icon}</div>
-      <div class="flex-1">
-        <div class="font-bold text-sm">${pack.name}</div>
-      </div>
+      <div class="flex-1"><div class="font-bold text-sm">${pack.name}</div></div>
       <div class="cat-check">${isSelected ? '✓' : ''}</div>
     `;
-
     card.addEventListener('click', () => {
       const idx = state.selectedPacks.indexOf(key);
       if (idx >= 0) {
-        if (state.selectedPacks.length === 1) {
-          toast('لازم فئة واحدة على الأقل');
-          return;
-        }
+        if (state.selectedPacks.length === 1) { toast('لازم فئة واحدة على الأقل'); return; }
         state.selectedPacks.splice(idx, 1);
         card.classList.remove('selected');
         card.querySelector('.cat-check').textContent = '';
@@ -416,10 +407,8 @@ function renderCategories() {
       }
       updateCategoryHint();
     });
-
     grid.appendChild(card);
   });
-
   updateCategoryHint();
 }
 
@@ -441,7 +430,6 @@ function renderTeamNameInputs() {
 function buildSetupScreen() {
   renderCategories();
   renderTeamNameInputs();
-
   const startBtn = $('startGameBtn');
   if (dataLoaded) {
     startBtn.disabled = false;
@@ -460,7 +448,7 @@ $('howToPlayBtn').addEventListener('click', () => {
     '👆 اضغط "إظهار الكلمة" وابدأ التمثيل فورًا.',
     '⏱️ كلمة واحدة فقط في كل دور، والعداد يعد تنازليًا.',
     '✅ لو الفريق خمّن صح اضغط "صح +1" وينتهي الدور فورًا.',
-    '⏭️ لو الكلمة صعبة أو مش واضحة، اضغط "تخطي" لتظهر كلمة جديدة فورًا بدون إنهاء الدور.',
+    '⏭️ لو الكلمة صعبة، اضغط "تخطي" — تظهر كلمة جديدة ويُعاد ضبط العدّاد على المدة الكاملة من جديد.',
     '⏰ لو الوقت خلص من غير تخمين، الفريق يأخذ صفر وينتقل الدور.',
     '🏆 أول فريق يصل لـ 5 نقاط يفوز.',
     '🔥 لو الفريقان تعادلا 4-4، الهدف يزيد لـ 6 نقاط.'
@@ -499,7 +487,6 @@ $('teamPlus').addEventListener('click', () => {
 async function loadAllData() {
   const filesToFetch = ['movies.json', 'players.json', 'anime.json'];
   const cache = {};
-
   await Promise.all(filesToFetch.map(async (filename) => {
     try {
       const res = await fetch(filename);
@@ -510,25 +497,16 @@ async function loadAllData() {
       cache[filename] = [];
     }
   }));
-
   window._rawFiles = cache;
   dataLoaded = true;
-
   buildSetupScreen();
 }
 
 // ============ بدء اللعبة ============
 $('startGameBtn').addEventListener('click', () => {
   ensureAudio();
-
-  if (!dataLoaded) {
-    toast('برجاء الانتظار حتى يتم تحميل البيانات');
-    return;
-  }
-  if (state.selectedPacks.length === 0) {
-    toast('اختر فئة واحدة على الأقل');
-    return;
-  }
+  if (!dataLoaded) { toast('برجاء الانتظار حتى يتم تحميل البيانات'); return; }
+  if (state.selectedPacks.length === 0) { toast('اختر فئة واحدة على الأقل'); return; }
 
   const nameInputs = document.querySelectorAll('.team-name-input');
   state.teams = [];
@@ -558,11 +536,9 @@ $('startGameBtn').addEventListener('click', () => {
 function buildMergedWordPool() {
   const pool = [];
   const cache = window._rawFiles || {};
-
   state.selectedPacks.forEach((key) => {
     const rawData = cache[PACKS[key].filename] || [];
     if (!Array.isArray(rawData)) return;
-
     rawData.forEach((item) => {
       if (!item || typeof item !== 'object') return;
       const text = item.name;
@@ -571,38 +547,27 @@ function buildMergedWordPool() {
       }
     });
   });
-
   const seen = new Set();
   const unique = [];
   pool.forEach((entry) => {
-    if (!seen.has(entry.word)) {
-      seen.add(entry.word);
-      unique.push(entry);
-    }
+    if (!seen.has(entry.word)) { seen.add(entry.word); unique.push(entry); }
   });
-
   return shuffle(unique);
 }
 
-// ============ اختيار كلمة جديدة (تُستخدم للعرض العادي وعند التخطي) ============
+// ============ اختيار كلمة جديدة ============
 function pickNextWord() {
-  // لو الطابور خلص، نعيد بناءه
   if (state.wordQueue.length === 0) {
     state.wordQueue = buildMergedWordPool();
-    // لو برضه فاضي (لا توجد بيانات)
     if (state.wordQueue.length === 0) return null;
   }
-
   let picked = state.wordQueue.pop();
-
-  // حاول تفادي تكرار الكلمة الأخيرة
   let attempts = 0;
   while (state.lastWord && picked.word === state.lastWord.word && attempts < 5 && state.wordQueue.length > 0) {
     state.wordQueue.unshift(picked);
     picked = state.wordQueue.pop();
     attempts++;
   }
-
   state.lastWord = picked;
   state.usedWords.add(picked.word);
   return picked;
@@ -611,24 +576,60 @@ function pickNextWord() {
 // ============ عرض الكلمة الحالية ============
 function displayWord(entry, animate = false) {
   const card = $('wordCard');
-
   if (!entry) {
     $('wordText').textContent = 'لا توجد كلمات';
     $('wordTag').textContent = '';
     return;
   }
-
-  // حركة انزلاق عند التخطي
   if (animate) {
     card.classList.remove('word-swap');
-    // إجبار إعادة تشغيل الأنيميشن
     void card.offsetWidth;
     card.classList.add('word-swap');
   }
-
   $('wordText').textContent = entry.word;
   const pack = PACKS[entry.packKey];
   $('wordTag').textContent = `${pack.icon} ${pack.name}`;
+}
+
+// ============ إدارة العدّاد (موحّد) ============
+function updateTimerUI() {
+  $('timerNum').textContent = state.timeLeft;
+  const fraction = Math.max(0, state.timeLeft) / state.timerDuration;
+  const offset = RING_CIRC * (1 - fraction);
+  const ring = $('timerRing');
+  ring.style.strokeDashoffset = offset;
+  ring.setAttribute('stroke', state.timeLeft <= 10 ? '#EF4444' : '#8B5CF6');
+}
+
+// تبدأ العدّاد من state.timeLeft الحالي
+function startTimer() {
+  clearInterval(state.timerId);
+  updateTimerUI();
+  state.timerId = setInterval(() => {
+    state.timeLeft--;
+    updateTimerUI();
+    if (state.timeLeft <= 5 && state.timeLeft > 0) tickSound();
+    if (state.timeLeft <= 0) {
+      clearInterval(state.timerId);
+      buzzSound();
+      endRound('timeout');
+    }
+  }, 1000);
+}
+
+// تعيد ضبط العدّاد للمدة الكاملة + وميض بصري + تشغيل العد التنازلي
+function resetAndRestartTimer() {
+  clearInterval(state.timerId);
+  state.timeLeft = state.timerDuration;
+
+  // إزالة الوميض السابق وإعادة تشغيله
+  const wrap = $('timerWrap');
+  wrap.classList.remove('timer-flash');
+  void wrap.offsetWidth;
+  wrap.classList.add('timer-flash');
+
+  updateTimerUI();
+  startTimer();
 }
 
 // ============ شاشة اللعب ============
@@ -658,8 +659,7 @@ function startTurn() {
   $('roundEnd').classList.add('hidden');
   $('roundEnd').classList.remove('flex');
 
-  const cur = state.teams[state.currentTeamIndex];
-  $('currentTeamName').textContent = cur.name;
+  $('currentTeamName').textContent = state.teams[state.currentTeamIndex].name;
 }
 
 $('revealBtn').addEventListener('click', () => {
@@ -673,38 +673,22 @@ $('revealBtn').addEventListener('click', () => {
 
   state.timeLeft = state.timerDuration;
   state.roundActive = true;
-  updateTimerUI();
-
-  state.timerId = setInterval(() => {
-    state.timeLeft--;
-    updateTimerUI();
-    if (state.timeLeft <= 5 && state.timeLeft > 0) tickSound();
-    if (state.timeLeft <= 0) {
-      clearInterval(state.timerId);
-      buzzSound();
-      endRound('timeout');
-    }
-  }, 1000);
+  resetAndRestartTimer();
 });
 
-function updateTimerUI() {
-  $('timerNum').textContent = state.timeLeft;
-  const fraction = Math.max(0, state.timeLeft) / state.timerDuration;
-  const offset = RING_CIRC * (1 - fraction);
-  const ring = $('timerRing');
-  ring.style.strokeDashoffset = offset;
-  ring.setAttribute('stroke', state.timeLeft <= 10 ? '#EF4444' : '#8B5CF6');
-}
-
-// ============ زر التخطي ============
+// ============ زر التخطي (تخطي + إعادة ضبط الوقت) ============
 $('skipBtn').addEventListener('click', () => {
   if (!state.roundActive) return;   // لا يعمل إلا خلال الدور الفعلي
   skipSound();
 
+  // 1) كلمة جديدة
   const entry = pickNextWord();
-  displayWord(entry, true);         // animat = true → انزلاق بصري
+  displayWord(entry, true);
 
-  // ملاحظة: لا نلمس العداد، ولا نوقف الدور، ولا ننتقل للفريق التالي
+  // 2) إعادة العدّاد للمدة الكاملة (30/60/90) وإعادة التشغيل فورًا
+  resetAndRestartTimer();
+
+  // 3) لا إنهاء للدور ولا تبديل للفريق
 });
 
 // ============ زر الإجابة الصحيحة ============
@@ -728,10 +712,7 @@ function checkDeuceAndWinner() {
     }
   }
   const winner = state.teams.find((team) => team.score >= state.targetScore);
-  if (winner) {
-    state.gameOver = true;
-    state.winner = winner;
-  }
+  if (winner) { state.gameOver = true; state.winner = winner; }
 }
 
 function endRound(outcome) {
@@ -758,9 +739,7 @@ function endRound(outcome) {
     $('endRoundScore').className = 'text-4xl font-black text-zinc-500 mb-6';
   }
 
-  $('nextTeamBtn').textContent = state.gameOver
-    ? 'عرض النتيجة 🏆'
-    : 'التالي ⏩';
+  $('nextTeamBtn').textContent = state.gameOver ? 'عرض النتيجة 🏆' : 'التالي ⏩';
 }
 
 $('nextTeamBtn').addEventListener('click', () => {
