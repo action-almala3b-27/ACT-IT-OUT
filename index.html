@@ -574,9 +574,18 @@ function buildMergedWordPool() {
   state.selectedPacks.forEach((key) => {
     const pack = PACKS[key];
     const filename = pack.filename; 
-    const words = cache[filename] || [];
-    words.forEach((word) => {
-      pool.push({ word, packKey: key, icon: pack.icon });
+    const rawList = cache[filename] || [];
+    
+    rawList.forEach((item) => {
+      let textVal = '';
+      if (typeof item === 'string') {
+        textVal = item;
+      } else if (item && typeof item === 'object') {
+        textVal = item.word || item.name || item.title || Object.values(item)[0] || '';
+      }
+      if (textVal) {
+        pool.push({ word: String(textVal), packKey: key, icon: pack.icon });
+      }
     });
   });
   return shuffle(pool);
