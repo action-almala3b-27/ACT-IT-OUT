@@ -1,22 +1,21 @@
 <!DOCTYPE html>
-<html lang="ar" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<title>التمثيل | ACT IT OUT</title>
+<title>التمثيل</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&family=Montserrat:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root { color-scheme: dark; }
   html, body {
     height: 100%;
     overflow: hidden;
     background: #09090B;
-    font-family: 'Montserrat', 'Cairo', sans-serif;
+    font-family: 'Cairo', sans-serif;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior: none;
   }
-  .arabic { font-family: 'Cairo', sans-serif; }
   .screen { height: 100dvh; width: 100%; }
   .home-bg {
     background:
@@ -29,7 +28,7 @@
     background: linear-gradient(90deg, #FB7185 0%, #EC4899 35%, #C084FC 70%, #8B5CF6 100%);
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     filter: drop-shadow(0 0 14px rgba(236,72,153,0.45)) drop-shadow(0 0 28px rgba(139,92,246,0.35));
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
   }
   .subtitle-glow { color: #B794F4; text-shadow: 0 0 10px rgba(167,139,250,0.6); }
   .glow-text { color: #C4B5FD; text-shadow: 0 0 8px #8B5CF6, 0 0 24px #8B5CF6, 0 0 48px #6D28D9; }
@@ -46,7 +45,6 @@
   }
   .btn-hero:active { transform: scale(0.97); }
   .btn-hero:disabled { opacity: 0.35; box-shadow: none; }
-  .btn-join { background: linear-gradient(90deg, #7C3AED, #8B5CF6); box-shadow: 0 0 16px rgba(139,92,246,0.5); }
   .btn-ghost {
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
     transition: transform .12s ease, background .12s ease;
@@ -109,7 +107,7 @@
   #categoryGrid::-webkit-scrollbar { display: none; }
   #categoryGrid { scrollbar-width: none; }
   .toast { animation: fadein .2s ease, fadeout .3s ease 2.4s forwards; }
-  @keyframes fadein { from { opacity:0; transform: translate(-50%, 10px);} to { opacity:1; transform: translate(-50%,0);} }
+  @keyframes fadein { from { opacity:0; transform: translate(50%, 10px);} to { opacity:1; transform: translate(50%,0);} }
   @keyframes fadeout { to { opacity: 0; } }
 </style>
 </head>
@@ -117,60 +115,57 @@
 
 <div id="toastHost" class="fixed top-3 left-1/2 z-50 pointer-events-none"></div>
 
-<!-- ============ SCREEN 1: LANGUAGE SELECT ============ -->
-<div id="screen-lang" class="screen home-bg flex flex-col items-center justify-center px-6">
-  <div class="mb-8 text-center">
-    <div class="hero-icon text-6xl mb-2">🎭</div>
-    <h1 class="text-4xl font-black title-gradient tracking-widest leading-tight">التمثيل</h1>
-    <p class="text-2xl font-black subtitle-glow mt-1 tracking-widest">ACT IT OUT</p>
-    <p class="text-zinc-500 text-xs mt-3 tracking-wide">لعبة تمثيل جماعية من موبايل واحد فقط</p>
-  </div>
-  <div class="home-card rounded-2xl p-5 w-full max-w-sm space-y-3">
-    <button data-lang="ar" class="lang-btn btn-hero w-full rounded-xl py-4 text-lg font-black arabic">العربية</button>
-    <button data-lang="en" class="lang-btn btn-join w-full rounded-xl py-4 text-lg font-black tracking-wide">English</button>
-  </div>
-</div>
-
-<!-- ============ SCREEN 2: SETUP ============ -->
-<div id="screen-setup" class="screen hidden home-bg flex-col overflow-hidden">
+<!-- ============ SCREEN 1: SETUP ============ -->
+<div id="screen-setup" class="screen home-bg flex flex-col overflow-hidden">
   <div class="flex items-center justify-between px-4 py-3 shrink-0">
-    <button id="backToLang" class="btn-ghost rounded-full w-9 h-9 flex items-center justify-center text-lg">←</button>
+    <div class="w-9"></div>
     <div class="text-center">
-      <div id="setupTitle" class="text-lg font-black glow-text tracking-widest arabic">التمثيل</div>
+      <div class="text-lg font-black glow-text tracking-widest">🎭 التمثيل</div>
     </div>
     <button id="howToPlayBtn" class="btn-ghost rounded-full w-9 h-9 flex items-center justify-center text-lg">❓</button>
   </div>
+
   <div class="flex-1 overflow-y-auto px-4 pb-3 space-y-4">
+    <div class="home-card rounded-2xl p-4 text-center">
+      <div class="hero-icon text-4xl mb-1">🎭</div>
+      <h1 class="text-2xl font-black title-gradient leading-tight">التمثيل</h1>
+      <p class="text-zinc-500 text-[11px] mt-1">لعبة تمثيل جماعية من موبايل واحد فقط</p>
+    </div>
+
     <div>
       <div class="flex items-center justify-between mb-2">
-        <div id="labelCategory" class="text-[11px] tracking-widest text-zinc-400 arabic">اختار فئة أو أكتر</div>
-        <div id="categoryHint" class="text-[10px] text-purple-300 arabic"></div>
+        <div class="text-[11px] tracking-widest text-zinc-400">اختر فئة أو أكثر</div>
+        <div id="categoryHint" class="text-[10px] text-purple-300"></div>
       </div>
       <div id="categoryGrid" class="grid grid-cols-1 gap-2"></div>
     </div>
+
     <div>
-      <div id="labelTimer" class="text-[11px] tracking-widest text-zinc-400 mb-2 arabic">مدة الوقت</div>
+      <div class="text-[11px] tracking-widest text-zinc-400 mb-2">مدة الوقت</div>
       <div class="grid grid-cols-3 gap-2">
-        <button data-timer="30" class="timer-btn opt-pill rounded-xl py-2.5 font-black">30s</button>
-        <button data-timer="60" class="timer-btn opt-pill rounded-xl py-2.5 font-black selected">60s</button>
-        <button data-timer="90" class="timer-btn opt-pill rounded-xl py-2.5 font-black">90s</button>
+        <button data-timer="30" class="timer-btn opt-pill rounded-xl py-2.5 font-black">30 ثانية</button>
+        <button data-timer="60" class="timer-btn opt-pill rounded-xl py-2.5 font-black selected">60 ثانية</button>
+        <button data-timer="90" class="timer-btn opt-pill rounded-xl py-2.5 font-black">90 ثانية</button>
       </div>
     </div>
+
     <div>
-      <div id="labelTeams" class="text-[11px] tracking-widest text-zinc-400 mb-2 arabic">عدد الفرق</div>
+      <div class="text-[11px] tracking-widest text-zinc-400 mb-2">عدد الفرق</div>
       <div class="input-glass flex items-center justify-between rounded-xl px-4 py-2.5">
         <button id="teamMinus" class="btn-ghost rounded-lg w-9 h-9 text-xl font-black flex items-center justify-center">−</button>
         <div id="teamCountDisplay" class="text-2xl font-black">2</div>
         <button id="teamPlus" class="btn-ghost rounded-lg w-9 h-9 text-xl font-black flex items-center justify-center">+</button>
       </div>
     </div>
+
     <div>
-      <div id="labelNames" class="text-[11px] tracking-widest text-zinc-400 mb-2 arabic">أسماء الفرق (اختياري)</div>
+      <div class="text-[11px] tracking-widest text-zinc-400 mb-2">أسماء الفرق (اختياري)</div>
       <div id="teamNamesList" class="space-y-2"></div>
     </div>
   </div>
+
   <div class="shrink-0 px-4 pb-4 pt-1">
-    <button id="startGameBtn" class="btn-hero w-full rounded-xl py-3.5 text-lg font-black arabic" disabled>جاري تحميل البيانات... ⏳</button>
+    <button id="startGameBtn" class="btn-hero w-full rounded-xl py-3.5 text-lg font-black" disabled>جاري تحميل البيانات... ⏳</button>
   </div>
 </div>
 
@@ -178,29 +173,32 @@
 <div id="howToModal" class="hidden fixed inset-0 z-40 bg-black/85 backdrop-blur-sm flex items-center justify-center px-6">
   <div class="home-card rounded-2xl p-6 w-full max-w-sm text-center max-h-[80vh] overflow-y-auto">
     <div class="text-4xl mb-3">📖</div>
-    <h2 id="howToTitle" class="text-xl font-black title-gradient mb-4 arabic">قواعد اللعبة</h2>
-    <div id="howToBody" class="text-sm text-zinc-300 leading-relaxed text-right space-y-2 arabic"></div>
-    <button id="closeHowToBtn" class="btn-hero w-full rounded-xl py-3 font-black mt-5 arabic">تمام، فهمت</button>
+    <h2 class="text-xl font-black title-gradient mb-4">قواعد اللعبة</h2>
+    <div id="howToBody" class="text-sm text-zinc-300 leading-relaxed text-right space-y-2"></div>
+    <button id="closeHowToBtn" class="btn-hero w-full rounded-xl py-3 font-black mt-5">تمام، فهمت</button>
   </div>
 </div>
 
 <!-- ============ SCREEN 3: GAME ============ -->
 <div id="screen-game" class="screen hidden flex-col home-bg">
   <div class="flex items-center justify-between px-4 py-2 shrink-0">
-    <button id="endGameBtn" class="btn-ghost rounded-full px-3 py-1.5 text-[11px] font-bold">🏁 <span class="endTxt">إنهاء</span></button>
-    <div class="text-sm font-black glow-text tracking-widest">🎭 <span class="arabic appTitleSpan">التمثيل</span></div>
+    <button id="endGameBtn" class="btn-ghost rounded-full px-3 py-1.5 text-[11px] font-bold">🏁 إنهاء</button>
+    <div class="text-sm font-black glow-text tracking-widest">🎭 التمثيل</div>
     <div class="text-[11px] text-zinc-500 flex items-center gap-2">
       <span id="catNameTag"></span>
       <span class="opt-pill rounded-full px-2 py-0.5">🎯 <span id="targetScoreTag">5</span></span>
     </div>
   </div>
+
   <div id="teamStrip" class="flex gap-1.5 overflow-x-auto px-3 pb-2 shrink-0"></div>
+
   <div class="flex-1 flex flex-col items-center justify-center px-6 min-h-0 relative">
     <div id="turnIntro" class="text-center">
-      <div id="turnTeamLabel" class="text-zinc-400 text-sm mb-1 arabic">دور فريق</div>
+      <div class="text-zinc-400 text-sm mb-1">دور فريق</div>
       <div id="currentTeamName" class="text-3xl font-black title-gradient mb-6"></div>
-      <button id="revealBtn" class="btn-hero rounded-2xl px-8 py-5 text-lg font-black arabic">👆 اضغط لإظهار الكلمة</button>
+      <button id="revealBtn" class="btn-hero rounded-2xl px-8 py-5 text-lg font-black">👆 اضغط لإظهار الكلمة</button>
     </div>
+
     <div id="roundActive" class="hidden flex-col items-center w-full">
       <div class="flex items-center justify-center gap-5 w-full max-w-xs mb-6">
         <div class="relative w-24 h-24 shrink-0">
@@ -211,19 +209,21 @@
           </svg>
           <div id="timerNum" class="absolute inset-0 flex items-center justify-center text-2xl font-black">60</div>
         </div>
-        <button id="correctBtn" class="btn-correct rounded-2xl py-6 flex-1 h-24 font-black text-white text-lg">✅ <span id="correctBtnText" class="arabic">صح</span> +1</button>
+        <button id="correctBtn" class="btn-correct rounded-2xl py-6 flex-1 h-24 font-black text-white text-lg">✅ صح +1</button>
       </div>
+
       <div id="wordCard" class="word-reveal home-card rounded-2xl px-6 py-8 w-full max-w-xs text-center">
         <div id="wordTag" class="text-[10px] tracking-widest text-purple-300 mb-1"></div>
         <div id="wordText" class="text-2xl font-black leading-snug"></div>
       </div>
     </div>
+
     <div id="roundEnd" class="hidden flex-col items-center text-center">
       <div id="endIcon" class="text-5xl mb-3">⏰</div>
-      <div id="endHeadline" class="text-xl font-black mb-1 arabic">خلص الوقت!</div>
-      <div class="text-zinc-400 text-sm mb-1 arabic"><span id="teamSubLabel">فريق</span> <span id="endTeamName" class="text-purple-300 font-bold"></span></div>
+      <div id="endHeadline" class="text-xl font-black mb-1">خلص الوقت!</div>
+      <div class="text-zinc-400 text-sm mb-1">فريق <span id="endTeamName" class="text-purple-300 font-bold"></span></div>
       <div class="text-4xl font-black glow-text mb-6"><span id="endRoundScore">+0</span></div>
-      <button id="nextTeamBtn" class="btn-hero rounded-xl px-8 py-3.5 font-black arabic">التالي ⏩</button>
+      <button id="nextTeamBtn" class="btn-hero rounded-xl px-8 py-3.5 font-black">التالي ⏩</button>
     </div>
   </div>
 </div>
@@ -232,30 +232,28 @@
 <div id="finalModal" class="hidden fixed inset-0 z-40 bg-black/85 backdrop-blur-sm flex items-center justify-center px-6">
   <div class="home-card rounded-2xl p-6 w-full max-w-sm text-center">
     <div class="text-5xl mb-3">🏆</div>
-    <h2 id="finalTitle" class="text-2xl font-black title-gradient mb-4 arabic">النتيجة النهائية</h2>
-    <div id="finalScoreList" class="space-y-2 mb-6 text-left"></div>
-    <button id="playAgainBtn" class="btn-hero w-full rounded-xl py-3 font-black arabic">لعبة جديدة</button>
+    <h2 class="text-2xl font-black title-gradient mb-4">النتيجة النهائية</h2>
+    <div id="finalScoreList" class="space-y-2 mb-6 text-right"></div>
+    <button id="playAgainBtn" class="btn-hero w-full rounded-xl py-3 font-black">لعبة جديدة 🔄</button>
   </div>
 </div>
 
 <script>
-// ============ PACK CONFIG ============
-// NOTE: `filename` is now only used for anime/players.
-// Movies pick arabicMovies.json / englishMovies.json dynamically by language.
+// ============ إعداد الفئات ============
 const PACKS = {
   movies: {
     icon: '🎬',
-    name: { ar: 'أفلام ومسلسلات', en: 'Movies & Series' },
-    filename: null // dynamic per language
+    name: 'أفلام ومسلسلات',
+    filename: 'movies.json'
   },
   players: {
     icon: '⚽',
-    name: { ar: 'لاعيبة كرة قدم', en: 'Football Players' },
+    name: 'لاعيبة كرة قدم',
     filename: 'players.json'
   },
   anime: {
     icon: '🀄',
-    name: { ar: 'أنمي', en: 'Anime' },
+    name: 'أنمي',
     filename: 'anime.json'
   }
 };
@@ -264,7 +262,7 @@ const PACK_ORDER = ['movies', 'players', 'anime'];
 let dataLoaded = false;
 
 async function loadAllData() {
-  const filesToFetch = ['arabicMovies.json', 'englishMovies.json', 'players.json', 'anime.json'];
+  const filesToFetch = ['movies.json', 'players.json', 'anime.json'];
   const cache = {};
 
   await Promise.all(filesToFetch.map(async (filename) => {
@@ -273,7 +271,7 @@ async function loadAllData() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       cache[filename] = await res.json();
     } catch (err) {
-      console.error(`Error loading ${filename}:`, err);
+      console.error(`خطأ في تحميل ${filename}:`, err);
       cache[filename] = [];
     }
   }));
@@ -282,12 +280,11 @@ async function loadAllData() {
   dataLoaded = true;
   const startBtn = $('startGameBtn');
   startBtn.disabled = false;
-  startBtn.innerHTML = t('ابدأ اللعب 🎬', '🎬 START GAME');
+  startBtn.textContent = 'ابدأ اللعب 🎬';
   buildSetupScreen();
 }
 
 const state = {
-  lang: 'ar',
   selectedPacks: ['movies'],
   timerDuration: 60,
   teamCount: 2,
@@ -310,7 +307,7 @@ const RING_CIRC = 276.5;
 function toast(text) {
   const host = $('toastHost');
   const el = document.createElement('div');
-  el.className = 'toast home-card rounded-full px-4 py-2 text-sm mb-2 arabic';
+  el.className = 'toast home-card rounded-full px-4 py-2 text-sm mb-2';
   el.style.left = '50%';
   el.textContent = text;
   host.appendChild(el);
@@ -341,58 +338,25 @@ function buzzSound() { beep(160, 0.5, 'sawtooth', 0.22); setTimeout(() => beep(1
 function correctSound() { beep(1046, 0.12, 'sine', 0.16); setTimeout(() => beep(1318, 0.14, 'sine', 0.16), 90); }
 
 function showScreen(id) {
-  ['screen-lang', 'screen-setup', 'screen-game'].forEach((s) => {
+  ['screen-setup', 'screen-game'].forEach((s) => {
     $(s).classList.toggle('hidden', s !== id);
     $(s).classList.toggle('flex', s === id);
   });
 }
 
-document.querySelectorAll('.lang-btn').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    ensureAudio();
-    state.lang = btn.dataset.lang;
-    buildSetupScreen();
-    showScreen('screen-setup');
-    if (!dataLoaded) loadAllData();
-  });
-});
-
-$('backToLang').addEventListener('click', () => showScreen('screen-lang'));
-
-const HOW_TO_TEXT = {
-  ar: {
-    title: 'قواعد اللعبة',
-    lines: [
-      '🎯 كل فريق ياخد دوره يمثل كلمة والباقيين يخمنوا.',
-      '🗂️ اختار فئة أو أكتر؛ لو اخترت أكتر من فئة، الكلمات بتتسحب عشوائي.',
-      '👆 اضغط "اظهار الكلمة" وابدأ التمثيل فورًا.',
-      '⏱️ كلمة واحدة بس في كل دور، والعداد بيعد تنازلي.',
-      '✅ لو الفريق خمن صح دوس "صح +1" وينتهي الدور فورًا.',
-      '⏰ لو الوقت خلص من غير تخمين، الفريق ياخد صفر وينتقل الدور.',
-      '🏆 أول فريق يوصل لـ 5 نقاط يكسب.',
-      '🔥 لو الفريقين اتعادلوا 4-4، الهدف بيزيد لـ 6 نقاط.'
-    ]
-  },
-  en: {
-    title: 'How to Play',
-    lines: [
-      '🎯 Each team takes a turn acting out a word for others to guess.',
-      '🗂️ Pick one or more packs; words are pulled randomly.',
-      '👆 Tap "Reveal Word" and start acting immediately.',
-      '⏱️ Only one word per turn, timer counts down.',
-      '✅ If guessed correctly, tap "Correct +1".',
-      '⏰ If time runs out, the team gets 0.',
-      '🏆 First team to reach 5 points wins.',
-      '🔥 If both teams tie 4-4, target rises to 6.'
-    ]
-  }
-};
+const HOW_TO_LINES = [
+  '🎯 كل فريق يأخذ دوره في تمثيل كلمة والباقي يخمّنون.',
+  '🗂️ اختر فئة أو أكثر؛ لو اخترت أكثر من فئة، الكلمات تُسحب بشكل عشوائي.',
+  '👆 اضغط "إظهار الكلمة" وابدأ التمثيل فورًا.',
+  '⏱️ كلمة واحدة فقط في كل دور، والعداد يعد تنازليًا.',
+  '✅ لو الفريق خمّن صح اضغط "صح +1" وينتهي الدور فورًا.',
+  '⏰ لو الوقت خلص من غير تخمين، الفريق يأخذ صفر وينتقل الدور.',
+  '🏆 أول فريق يصل لـ 5 نقاط يفوز.',
+  '🔥 لو الفريقان تعادلا 4-4، الهدف يزيد لـ 6 نقاط.'
+];
 
 $('howToPlayBtn').addEventListener('click', () => {
-  const dict = HOW_TO_TEXT[state.lang];
-  $('howToTitle').textContent = dict.title;
-  $('howToBody').innerHTML = dict.lines.map((l) => `<div>${l}</div>`).join('');
-  $('closeHowToBtn').textContent = t('تمام، فهمت', 'Got it');
+  $('howToBody').innerHTML = HOW_TO_LINES.map((l) => `<div>${l}</div>`).join('');
   $('howToModal').classList.remove('hidden');
   $('howToModal').classList.add('flex');
 });
@@ -401,28 +365,17 @@ $('closeHowToBtn').addEventListener('click', () => {
   $('howToModal').classList.remove('flex');
 });
 
-function t(ar, en) { return state.lang === 'ar' ? ar : en; }
-
 function updateCategoryHint() {
   const n = state.selectedPacks.length;
   $('categoryHint').textContent = n > 0
-    ? `${n} ${t('فئة مختارة', 'packs selected')}`
-    : t('اختار فئة واحدة على الأقل', 'Select at least one');
+    ? `${n} فئة مختارة`
+    : 'اختر فئة واحدة على الأقل';
 }
 
 function buildSetupScreen() {
-  $('setupTitle').textContent = t('التمثيل', 'ACT IT OUT');
-  $('labelCategory').textContent = t('اختار فئة أو أكتر', 'CHOOSE PACKS');
-  $('labelTimer').textContent = t('مدة الوقت', 'TIMER');
-  $('labelTeams').textContent = t('عدد الفرق', 'TEAMS');
-  $('labelNames').textContent = t('أسماء الفرق (اختياري)', 'TEAM NAMES');
-
-  if (dataLoaded) {
-    $('startGameBtn').innerHTML = t('ابدأ اللعب 🎬', '🎬 START GAME');
-  } else {
-    $('startGameBtn').innerHTML = t('جاري تحميل البيانات... ⏳', 'Loading Data... ⏳');
-  }
-  document.documentElement.dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+  const startBtn = $('startGameBtn');
+  if (dataLoaded) startBtn.textContent = 'ابدأ اللعب 🎬';
+  else startBtn.textContent = 'جاري تحميل البيانات... ⏳';
 
   const grid = $('categoryGrid');
   grid.innerHTML = '';
@@ -432,11 +385,11 @@ function buildSetupScreen() {
     const pack = PACKS[key];
     const isSelected = state.selectedPacks.includes(key);
     const card = document.createElement('button');
-    card.className = `cat-card rounded-xl px-4 py-3 flex items-center gap-3 text-left w-full ${isSelected ? 'selected' : ''}`;
+    card.className = `cat-card rounded-xl px-4 py-3 flex items-center gap-3 text-right w-full ${isSelected ? 'selected' : ''}`;
     card.innerHTML = `
       <div class="text-2xl">${pack.icon}</div>
       <div class="flex-1">
-        <div class="font-bold text-sm ${state.lang === 'ar' ? 'arabic' : ''}">${pack.name[state.lang]}</div>
+        <div class="font-bold text-sm">${pack.name}</div>
       </div>
       <div class="cat-check">${isSelected ? '✓' : ''}</div>
     `;
@@ -444,7 +397,7 @@ function buildSetupScreen() {
       const idx = state.selectedPacks.indexOf(key);
       if (idx >= 0) {
         if (state.selectedPacks.length === 1) {
-          toast(t('لازم فئة واحدة على الأقل', 'At least one pack required'));
+          toast('لازم فئة واحدة على الأقل');
           return;
         }
         state.selectedPacks.splice(idx, 1);
@@ -491,7 +444,7 @@ function renderTeamNameInputs() {
     wrap.className = 'input-glass rounded-xl px-3 py-1';
     wrap.innerHTML = `
       <input type="text" maxlength="14" data-idx="${i}"
-        placeholder="${t('فريق', 'Team')} ${i + 1}"
+        placeholder="فريق ${i + 1}"
         class="team-name-input w-full bg-transparent outline-none text-sm py-2 text-white placeholder-zinc-600" />
     `;
     list.appendChild(wrap);
@@ -501,11 +454,11 @@ function renderTeamNameInputs() {
 $('startGameBtn').addEventListener('click', () => {
   ensureAudio();
   if (!dataLoaded) {
-    toast(t('برجاء الانتظار حتى يتم تحميل البيانات', 'Please wait for data to load'));
+    toast('برجاء الانتظار حتى يتم تحميل البيانات');
     return;
   }
   if (state.selectedPacks.length === 0) {
-    toast(t('اختار فئة واحدة على الأقل', 'Select at least one pack'));
+    toast('اختر فئة واحدة على الأقل');
     return;
   }
 
@@ -513,7 +466,7 @@ $('startGameBtn').addEventListener('click', () => {
   state.teams = [];
   nameInputs.forEach((inp, i) => {
     const val = inp.value.trim();
-    state.teams.push({ name: val || `${t('فريق', 'Team')} ${i + 1}`, score: 0 });
+    state.teams.push({ name: val || `فريق ${i + 1}`, score: 0 });
   });
 
   state.wordQueue = buildMergedWordPool();
@@ -537,51 +490,28 @@ function shuffle(arr) {
   return arr;
 }
 
-/**
- * Build a clean, language-aware word pool from the selected packs.
- * For anime & players we pick the `ar` or `en` field based on state.lang.
- * For movies we pick the correct JSON file + the `name` field.
- * No more extraction of stray numeric IDs or double-language duplicates.
- */
+// بناء قائمة الكلمات من الفئات المختارة
 function buildMergedWordPool() {
   const pool = [];
   const cache = window._rawFiles || {};
 
   state.selectedPacks.forEach((key) => {
-    let rawData = [];
-
-    if (key === 'movies') {
-      const filename = state.lang === 'ar' ? 'arabicMovies.json' : 'englishMovies.json';
-      rawData = cache[filename] || [];
-    } else {
-      rawData = cache[PACKS[key].filename] || [];
-    }
-
+    const rawData = cache[PACKS[key].filename] || [];
     if (!Array.isArray(rawData)) return;
 
     rawData.forEach((item) => {
       if (!item || typeof item !== 'object') return;
-
-      let text;
-      if (key === 'movies') {
-        // Both arabicMovies.json and englishMovies.json use { name: "..." }
-        text = item.name;
-      } else {
-        // anime.json and players.json use { ar: "...", en: "..." }
-        text = state.lang === 'ar' ? item.ar : item.en;
-      }
-
+      const text = item.name;
       if (typeof text === 'string' && text.trim().length > 0) {
         pool.push({ word: text.trim(), packKey: key, icon: PACKS[key].icon });
       }
     });
   });
 
-  // De-duplicate & shuffle
   const seen = new Set();
   const unique = [];
   pool.forEach((entry) => {
-    const k = entry.word.toLowerCase();
+    const k = entry.word;
     if (!seen.has(k)) { seen.add(k); unique.push(entry); }
   });
 
@@ -589,17 +519,8 @@ function buildMergedWordPool() {
 }
 
 function buildGameScreen() {
-  const packLabels = state.selectedPacks.map((k) => PACKS[k].icon).join(' ');
-  $('catNameTag').textContent = packLabels;
+  $('catNameTag').textContent = state.selectedPacks.map((k) => PACKS[k].icon).join(' ');
   $('targetScoreTag').textContent = state.targetScore;
-
-  document.querySelectorAll('.endTxt').forEach(el => el.textContent = t('إنهاء', 'End'));
-  document.querySelectorAll('.appTitleSpan').forEach(el => el.textContent = t('التمثيل', 'Act It Out'));
-  $('turnTeamLabel').textContent = t('دور فريق', "Team's Turn");
-  $('teamSubLabel').textContent = t('فريق', 'Team');
-  $('correctBtnText').textContent = t('صح', 'Correct');
-  $('finalTitle').textContent = t('النتيجة النهائية', 'Final Scoreboard');
-
   renderTeamStrip();
 }
 
@@ -611,7 +532,7 @@ function renderTeamStrip() {
     const item = document.createElement('div');
     item.className = `opt-pill rounded-xl px-3 py-1.5 shrink-0 flex items-center gap-2 ${isCurrent ? 'selected font-bold' : 'opacity-70'}`;
     item.innerHTML = `
-      <span class="text-xs ${state.lang === 'ar' ? 'arabic' : ''}">${team.name}</span>
+      <span class="text-xs">${team.name}</span>
       <span class="text-xs font-black text-purple-300 bg-white/10 px-1.5 py-0.5 rounded-md">${team.score}</span>
     `;
     strip.appendChild(item);
@@ -629,7 +550,6 @@ function startTurn() {
 
   const cur = state.teams[state.currentTeamIndex];
   $('currentTeamName').textContent = cur.name;
-  $('revealBtn').textContent = t('👆 اضغط لإظهار الكلمة', '👆 Tap to Reveal Word');
 }
 
 $('revealBtn').addEventListener('click', () => {
@@ -641,11 +561,9 @@ $('revealBtn').addEventListener('click', () => {
   if (state.wordQueue.length === 0) state.wordQueue = buildMergedWordPool();
   state.lastWord = state.wordQueue.pop();
 
-  $('wordText').textContent = state.lastWord
-    ? state.lastWord.word
-    : t('لا توجد كلمات', 'No words available');
+  $('wordText').textContent = state.lastWord ? state.lastWord.word : 'لا توجد كلمات';
   const pack = PACKS[state.lastWord ? state.lastWord.packKey : state.selectedPacks[0]];
-  $('wordTag').textContent = `${pack.icon} ${pack.name[state.lang]}`;
+  $('wordTag').textContent = `${pack.icon} ${pack.name}`;
 
   state.timeLeft = state.timerDuration;
   state.roundActive = true;
@@ -676,19 +594,19 @@ $('correctBtn').addEventListener('click', () => {
   if (!state.roundActive) return;
   clearInterval(state.timerId);
   correctSound();
-  const cur = state.teams[state.currentTeamIndex];
-  cur.score += 1;
+  state.teams[state.currentTeamIndex].score += 1;
   endRound('correct');
 });
 
 function checkDeuceAndWinner() {
   if (!state.deuceTriggered) {
-    const allAtDeuce = state.teams.length >= 2 && state.teams.every((team) => team.score === state.targetScore - 1);
+    const allAtDeuce = state.teams.length >= 2 &&
+      state.teams.every((team) => team.score === state.targetScore - 1);
     if (allAtDeuce) {
       state.targetScore += 1;
       state.deuceTriggered = true;
       $('targetScoreTag').textContent = state.targetScore;
-      toast(t('🔥 تعادل! الهدف أصبح 6 نقاط', '🔥 Deuce! Target is 6 points'));
+      toast('🔥 تعادل! الهدف أصبح 6 نقاط');
     }
   }
   const winner = state.teams.find((team) => team.score >= state.targetScore);
@@ -712,19 +630,19 @@ function endRound(outcome) {
 
   if (outcome === 'correct') {
     $('endIcon').textContent = '🎉';
-    $('endHeadline').textContent = t('إجابة صحيحة!', 'Correct Answer!');
+    $('endHeadline').textContent = 'إجابة صحيحة!';
     $('endRoundScore').textContent = '+1';
     $('endRoundScore').className = 'text-4xl font-black text-green-400 mb-6';
   } else {
     $('endIcon').textContent = '⏰';
-    $('endHeadline').textContent = t('خلص الوقت!', "Time's Up!");
+    $('endHeadline').textContent = 'خلص الوقت!';
     $('endRoundScore').textContent = '+0';
     $('endRoundScore').className = 'text-4xl font-black text-zinc-500 mb-6';
   }
 
   $('nextTeamBtn').textContent = state.gameOver
-    ? t('عرض النتيجة 🏆', 'View Final Results 🏆')
-    : t('التالي ⏩', 'Next Turn ⏩');
+    ? 'عرض النتيجة 🏆'
+    : 'التالي ⏩';
 }
 
 $('nextTeamBtn').addEventListener('click', () => {
@@ -749,13 +667,12 @@ function showFinalBoard() {
     item.innerHTML = `
       <div class="flex items-center gap-3">
         <span class="text-xl">${i === 0 ? '👑' : i === 1 ? '🥈' : i === 2 ? '🥉' : '👏'}</span>
-        <span class="font-bold text-base ${state.lang === 'ar' ? 'arabic' : ''}">${team.name}</span>
+        <span class="font-bold text-base">${team.name}</span>
       </div>
       <span class="text-xl font-black text-purple-300">${team.score}</span>
     `;
     list.appendChild(item);
   });
-  $('playAgainBtn').textContent = t('لعبة جديدة 🔄', 'Play Again 🔄');
   $('finalModal').classList.remove('hidden');
   $('finalModal').classList.add('flex');
 }
